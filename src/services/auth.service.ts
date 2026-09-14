@@ -72,6 +72,37 @@ class AuthService {
             tokens
         }
     }
+
+    async refresh (refreshToken : string, userAgent : string)
+    : Promise<{
+        userId: Types.ObjectId;
+        tokens: {
+            accessToken: string;
+            refreshToken: string;
+        };
+    }> {
+        // Decode Refresh Token
+        const decode = tokenService.verifyRefreshToken(refreshToken)
+
+        // Get Session
+        const device = (new UAParser(userAgent)).getDevice()
+        const session = await sessionRepository.getSession(decode.userId, decode.jti)
+        if (!session)
+            throw new BadRequestError()
+
+        // Check Hashed Token
+        const verifyResult = await argon2.verify(session.refreshTokenHash, refreshToken)
+        if (!verifyResult)
+            throw new BadRequestError()
+
+        // Token Rotation
+        const tokens = await tokenService.refreshTokens(decode.userId, device ? device.toString() : 'unknows', decode.jti)
+
+        return {
+            userId : decode.userId,
+            tokens
+        }
+    }
 }
 
 export default new AuthService()

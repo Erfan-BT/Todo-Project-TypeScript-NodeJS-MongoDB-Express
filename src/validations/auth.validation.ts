@@ -11,5 +11,10 @@ export const loginSchema = z.object({
     password : z.string().trim().min(8, 'At Least 8 Characters Are Required').max(100, 'Max Characters : 100')
 })
 
+export const refreshTokenSchema = z.object({
+    refreshToken : z.string().trim()
+})
+
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
+export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>

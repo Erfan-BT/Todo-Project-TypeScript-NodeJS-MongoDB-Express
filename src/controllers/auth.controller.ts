@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { LoginDto, RegisterDto } from "../validations/auth.validation.js";
+import { LoginDto, RefreshTokenDto, RegisterDto } from "../validations/auth.validation.js";
 import authService from "../services/auth.service.js";
 
 class AuthController {
@@ -24,6 +24,22 @@ class AuthController {
             const loginData = req.validated.body as LoginDto
             const userAgent = req.headers['user-agent'] ?? '';
             const data = await authService.login(loginData, userAgent)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Login Successful',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async refresh (req : Request, res : Response, next : NextFunction) {
+        try {
+            const { refreshToken } = req.validated.body as RefreshTokenDto
+            const userAgent = req.headers['user-agent'] ?? '';
+            const data = await authService.refresh(refreshToken, userAgent)
 
             res.status(200).json({
                 success : true,

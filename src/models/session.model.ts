@@ -6,7 +6,6 @@ export interface ISession {
     jti : string;
     refreshTokenHash : string;
     expiresTime : string;
-    revokedAt : Date | null;
     createdAt : Date;
     updatedAt : Date | null;
     device : string | null;
@@ -31,11 +30,6 @@ export const sessionSchema = new Schema<ISession>(
         expiresTime : {
             type : String,
             required : true
-        },
-        revokedAt : {
-            type : Date,
-            default : null,
-            allowNull : true
         },
         device : {
             type : String,
