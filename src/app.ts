@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import { env } from './configs/env.config.js'
 
+import AuthRoutes from './routes/auth.routes.js'
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.get('/health', (req: Request, res: Response) => {
 })
 
 // Main Routes
+app.use('/api/v1/auth', AuthRoutes)
 
 // Error Handler
 // app.use((req : Request , res : Response, next : NextFunction) => {
