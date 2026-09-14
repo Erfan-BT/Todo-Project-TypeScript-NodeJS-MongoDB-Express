@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { z } from 'zod';
-import { logger } from './pino.config.js';
 
 const envSchema = z.object({
     // FrontEnd
@@ -33,7 +32,7 @@ if (!parsed.success) {
     for (const issue of parsed.error.issues) {
         errors.push(`- ${issue.path.join('.')}: ${issue.message}`);
     }
-    logger.fatal({errors}, 'Invalid Environment Variables');
+    console.error({errors}, 'Invalid Environment Variables');
     process.exit(1);
 }
 
