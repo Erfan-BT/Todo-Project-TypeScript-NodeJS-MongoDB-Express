@@ -1,8 +1,8 @@
-import { Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
 
 export interface ISession {
-    _id : Number;
-    userId : Number;
+    _id : Types.ObjectId;
+    userId : Types.ObjectId;
     jti : string;
     refreshTokenHash : string;
     expiresTime : string;
