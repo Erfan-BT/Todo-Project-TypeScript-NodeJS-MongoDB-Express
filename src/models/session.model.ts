@@ -9,7 +9,7 @@ export interface ISession {
     revokedAt : Date | null;
     createdAt : Date;
     updatedAt : Date | null;
-    device : string;
+    device : string | null;
 }
 
 export const sessionSchema = new Schema<ISession>(
@@ -39,7 +39,8 @@ export const sessionSchema = new Schema<ISession>(
         },
         device : {
             type : String,
-            required : true
+            required : false,
+            allowNull : true
         }
     },
     {

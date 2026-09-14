@@ -1,4 +1,4 @@
-import { Types } from "mongoose"
+import { DeleteResult, Types } from "mongoose"
 import { Session } from "../models/index.js"
 import { ISession } from "../models/session.model.js"
 
@@ -12,6 +12,15 @@ class SessionRepository {
             expiresTime,
             device
         })
+    }
+
+    async deleteSessions (userId : Types.ObjectId, device ?: string)
+    : Promise<boolean> {
+        const result = await Session.deleteMany({
+            userId,
+            ...(device ? {device} : {})
+        })
+        return result.deletedCount > 0
     }
 }
 

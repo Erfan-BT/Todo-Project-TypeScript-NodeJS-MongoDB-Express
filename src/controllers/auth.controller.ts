@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { RegisterDto } from "../validations/auth.validation.js";
+import { LoginDto, RegisterDto } from "../validations/auth.validation.js";
 import authService from "../services/auth.service.js";
 
 class AuthController {
@@ -12,6 +12,22 @@ class AuthController {
             res.status(201).json({
                 success : true,
                 msg : 'Registration Successful',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async login (req : Request, res : Response, next : NextFunction) {
+        try {
+            const loginData = req.validated.body as LoginDto
+            const userAgent = req.headers['user-agent'] ?? '';
+            const data = await authService.login(loginData, userAgent)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Login Successful',
                 data
             })
         } catch (error) {
