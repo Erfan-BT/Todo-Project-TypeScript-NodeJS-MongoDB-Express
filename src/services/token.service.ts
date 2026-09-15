@@ -7,19 +7,18 @@ import { Types } from 'mongoose';
 import { BadRequestError } from '../utils/appError.js';
 
 class TokenService {
-    generateAccessToken (userId : Types.ObjectId)
+    generateAccessToken (userId : Types.ObjectId, jti : string)
     : string {
-        return jwt.sign({userId}, env.JWT_SECRET, {
+        return jwt.sign({
+            userId,
+            jti
+        }, env.JWT_SECRET, {
             expiresIn : env.JWT_EXPIRES_IN as any
         })
     }
 
-    generateRefreshToken (userId : Types.ObjectId)
-    : {
-        refreshToken : string;
-        jti : string;
-    } {
-        const jti = randomUUID() as string
+    generateRefreshToken (userId : Types.ObjectId, jti : string)
+    : string {
         const refreshToken = jwt.sign({
             userId,
             jti,
@@ -27,10 +26,8 @@ class TokenService {
             expiresIn : env.JWT_REFRESH_EXPIRES_IN as any
         })
 
-        return {
-            refreshToken,
-            jti
-        }
+        return refreshToken
+
     }
 
     async generateTokens(userId : Types.ObjectId, device : string)
@@ -38,8 +35,9 @@ class TokenService {
         accessToken : string;
         refreshToken : string;
     }> {
-        const accessToken = this.generateAccessToken(userId);
-        const {refreshToken , jti} = this.generateRefreshToken(userId)
+        const jti = randomUUID() as string
+        const accessToken = this.generateAccessToken(userId, jti)
+        const refreshToken = this.generateRefreshToken(userId, jti)
         
         const hashedRefreshToken = await argon2.hash(refreshToken)
 
@@ -57,6 +55,17 @@ class TokenService {
         jti : string;
     } {
         return jwt.verify(token, env.JWT_REFRESH_SECRET) as {
+            userId : Types.ObjectId,
+            jti : string
+        }
+    }
+
+    verifyAccessToken (token : string)
+    : {
+        userId : Types.ObjectId;
+        jti : string;
+    } {
+        return jwt.verify(token, env.JWT_SECRET) as {
             userId : Types.ObjectId,
             jti : string
         }
