@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { LoginDto, RefreshTokenDto, RegisterDto } from "../validations/auth.validation.js";
 import authService from "../services/auth.service.js";
+import { AuthRequest } from "../middleware/auth.middleware.js";
 
 class AuthController {
     async register (req : Request, res : Response, next : NextFunction) {
@@ -43,13 +44,28 @@ class AuthController {
 
             res.status(200).json({
                 success : true,
-                msg : 'Login Successful',
+                msg : 'New Tokens Created',
                 data
             })
         } catch (error) {
             next(error)
         }
     }
+
+    async logout (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId, jti} = req.user!
+            await authService.logout(userId, jti)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Logout Successful',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    } 
 }
 
 export default new AuthController()

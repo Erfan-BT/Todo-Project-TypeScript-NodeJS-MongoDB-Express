@@ -103,6 +103,12 @@ class AuthService {
             tokens
         }
     }
+
+    async logout (userId : Types.ObjectId, jti : string)
+    : Promise<void> {
+        // Delete Session
+        await tokenService.revokeRefreshTokenSession(userId, jti)
+    }
 }
 
 export default new AuthService()
