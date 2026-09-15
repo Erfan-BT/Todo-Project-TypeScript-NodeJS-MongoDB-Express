@@ -10,5 +10,6 @@ router.post('/register', validate({ body : registerSchema }), authControllers.re
 router.post('/login', validate({ body : loginSchema }), authControllers.login)
 router.post('/refresh', validate({ body : refreshTokenSchema }), authControllers.refresh)
 router.post('/logout', authMiddleware, authControllers.logout)
+router.post('/logout-all', authMiddleware, authControllers.logoutAll)
 
 export default router

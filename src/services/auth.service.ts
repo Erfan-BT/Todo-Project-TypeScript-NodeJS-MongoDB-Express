@@ -109,6 +109,12 @@ class AuthService {
         // Delete Session
         await tokenService.revokeRefreshTokenSession(userId, jti)
     }
+
+    async logoutAll (userId : Types.ObjectId)
+    : Promise<void> {
+        // Delete Session(s)
+        await sessionRepository.deleteSessions(userId)
+    }
 }
 
 export default new AuthService()

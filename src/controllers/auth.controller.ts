@@ -66,6 +66,21 @@ class AuthController {
             next(error)
         }
     } 
+
+    async logoutAll (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.user!
+            await authService.logoutAll(userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Logout From All Devices Successful',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    } 
 }
 
 export default new AuthController()
