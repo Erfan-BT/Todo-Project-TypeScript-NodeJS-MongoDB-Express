@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 import authRepository from "../repository/auth.repository.js";
 import { BadRequestError, ConflictError, ForbiddenError } from "../utils/appError.js";
-import { LoginDto, loginSchema, RegisterDto } from "../validations/auth.validation.js";
+import { LoginDto, RegisterDto } from "../validations/auth.validation.js";
 import tokenService from "./token.service.js";
 import {  Types } from "mongoose";
 import sessionRepository from "../repository/session.repository.js";
@@ -23,14 +23,23 @@ class AuthService {
 
         // Hash Password
         const hashedPassword = await argon2.hash(registerData.password)
-        registerData.password = hashedPassword
+        const userData = {
+            fullname : registerData.fullname,
+            username : registerData.username,
+            password : hashedPassword
+        }
 
         // Create User
-        const user = await authRepository.createUser(registerData)
+        const user = await authRepository.createUser(userData)
 
         // Create Tokens
-        const device = (new UAParser(userAgent)).getDevice()
-        const tokens = await tokenService.generateTokens(user._id, device ? device.toString() : 'unknows')
+        const deviceInfo = new UAParser(userAgent).getDevice()
+        const device = [
+            deviceInfo.vendor,
+            deviceInfo.model,
+        ].filter(Boolean).join(' ') || 'unknown'
+
+        const tokens = await tokenService.generateTokens(user._id, device)
 
         return {
             userId : user._id,
@@ -61,11 +70,16 @@ class AuthService {
             throw new BadRequestError('Username Or Password Is Incorrect')
 
         // Delete User Session(s)
-        const device = (new UAParser(userAgent)).getDevice()
-        await sessionRepository.deleteSessions(user._id, device ? device.toString() : 'unknows')
+        const deviceInfo = new UAParser(userAgent).getDevice()
+        const device = [
+            deviceInfo.vendor,
+            deviceInfo.model,
+        ].filter(Boolean).join(' ') || 'unknown'
+
+        await sessionRepository.deleteSessions(user._id, device)
 
         // Create Tokens
-        const tokens = await tokenService.generateTokens(user._id, device ? device.toString() : 'unknows')
+        const tokens = await tokenService.generateTokens(user._id, device)
 
         return {
             userId : user._id,
@@ -85,7 +99,12 @@ class AuthService {
         const decode = tokenService.verifyRefreshToken(refreshToken)
 
         // Get Session
-        const device = (new UAParser(userAgent)).getDevice()
+        const deviceInfo = new UAParser(userAgent).getDevice()
+        const device = [
+            deviceInfo.vendor,
+            deviceInfo.model,
+        ].filter(Boolean).join(' ') || 'unknown'
+
         const session = await sessionRepository.getSession(decode.userId, decode.jti)
         if (!session)
             throw new BadRequestError()
@@ -96,7 +115,7 @@ class AuthService {
             throw new BadRequestError()
 
         // Token Rotation
-        const tokens = await tokenService.refreshTokens(decode.userId, device ? device.toString() : 'unknows', decode.jti)
+        const tokens = await tokenService.refreshTokens(decode.userId, device, decode.jti)
 
         return {
             userId : decode.userId,
