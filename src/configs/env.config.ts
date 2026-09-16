@@ -11,11 +11,7 @@ const envSchema = z.object({
     
 
     // Database
-    // DB_HOST: z.string().min(1),
-    // DB_PORT: z.coerce.number().int().positive(),
-    // DB_DATABASE: z.string().min(1),
-    // DB_USER: z.string().min(1),
-    // DB_PASS: z.string(),
+    DB_URL : z.string().min(1),
 
     // JWT
     JWT_SECRET : z.string().min(1),
