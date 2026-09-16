@@ -2,8 +2,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../src/repository/auth.repository.js', () => ({
     default: {
+        getUserById : vi.fn(),
         getUserByUsername: vi.fn(),
         createUser: vi.fn(),
+        changePassword : vi.fn()
     }
 }))
 
@@ -37,6 +39,7 @@ import argon2 from 'argon2'
 import tokenService from '../../../src/services/token.service.js'
 import { BadRequestError, ConflictError, ForbiddenError } from '../../../src/utils/appError.js'
 import sessionRepository from '../../../src/repository/session.repository.js'
+import { ChangePasswordDto } from '../../../src/validations/auth.validation.js'
 
 beforeEach(() => {
     vi.clearAllMocks()
@@ -467,6 +470,151 @@ describe('AuthService.refresh', () => {
             userId,
             tokens,
         })
+    })
+})
+
+describe('AuthService.changePassword', () => {
+
+    test('should throw BadRequestError because the passwords are the same', async () => {
+        const userId = new Types.ObjectId()
+
+        const changePasswordData = {
+            oldPassword : 'old-password',
+            newPassword : 'old-password'
+        } as ChangePasswordDto
+
+        await expect(authService.changePassword(userId, changePasswordData))
+            .rejects.toBeInstanceOf(BadRequestError)
+
+        expect(authRepository.getUserById)
+            .not.toHaveBeenCalled()
+
+        expect(argon2.verify)
+            .not.toHaveBeenCalled()
+
+        expect(argon2.hash)
+            .not.toHaveBeenCalled()
+
+        expect(authRepository.changePassword)
+            .not.toHaveBeenCalled()
+    })
+
+    test('should throw BadRequestError because the old-password is incorrect', async () => {
+        const userId = new Types.ObjectId()
+
+        const changePasswordData = {
+            oldPassword : 'wrong-old-password',
+            newPassword : 'new-password'
+        } as ChangePasswordDto
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue({password : 'hashed-old-password'} as any)
+
+        vi.mocked(argon2.verify)
+            .mockResolvedValue(false)
+
+        await expect(authService.changePassword(userId, changePasswordData))
+            .rejects.toBeInstanceOf(BadRequestError)
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(argon2.verify)
+            .toHaveBeenCalledWith(
+                'hashed-old-password',
+                'wrong-old-password'
+            )
+
+        expect(argon2.hash)
+            .not.toHaveBeenCalled()
+
+        expect(authRepository.changePassword)
+            .not.toHaveBeenCalled()
+    })
+
+    test('should throw BadRequestError because authRepository.changePassword return false', async () => {
+        const userId = new Types.ObjectId()
+
+        const changePasswordData = {
+            oldPassword : 'old-password',
+            newPassword : 'new-password'
+        } as ChangePasswordDto
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue({password : 'hashed-old-password'} as any)
+
+        vi.mocked(argon2.verify)
+            .mockResolvedValue(true)
+
+        vi.mocked(argon2.hash)
+            .mockResolvedValue('hashed-new-password')
+
+        vi.mocked(authRepository.changePassword)
+            .mockResolvedValue(false)
+
+        await expect(authService.changePassword(userId, changePasswordData))
+            .rejects.toBeInstanceOf(BadRequestError)
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(argon2.verify)
+            .toHaveBeenCalledWith(
+                'hashed-old-password',
+                'old-password'
+            )
+
+        expect(argon2.hash)
+            .toHaveBeenCalledWith('new-password')
+
+        expect(authRepository.changePassword)
+            .toHaveBeenCalledWith(
+                userId,
+                'hashed-new-password'
+            )
+    })
+
+    test('should change password successfully', async () => {
+        const userId = new Types.ObjectId()
+
+        const changePasswordData = {
+            oldPassword : 'old-password',
+            newPassword : 'new-password'
+        } as ChangePasswordDto
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue({password : 'hashed-old-password'} as any)
+
+        vi.mocked(argon2.verify)
+            .mockResolvedValue(true)
+
+        vi.mocked(argon2.hash)
+            .mockResolvedValue('hashed-new-password')
+
+        vi.mocked(authRepository.changePassword)
+            .mockResolvedValue(true)
+
+        const result = await authService.changePassword(userId, changePasswordData)
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(argon2.verify)
+            .toHaveBeenCalledWith(
+                'hashed-old-password',
+                'old-password'
+            )
+
+        expect(argon2.hash)
+            .toHaveBeenCalledWith('new-password')
+
+        expect(authRepository.changePassword)
+            .toHaveBeenCalledWith(
+                userId,
+                'hashed-new-password'
+            )
+
+        expect(result).toBe(undefined)
     })
 })
 

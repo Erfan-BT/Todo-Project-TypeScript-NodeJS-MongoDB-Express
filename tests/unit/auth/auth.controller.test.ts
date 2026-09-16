@@ -5,6 +5,7 @@ vi.mock('../../../src/services/auth.service.js', () => ({
         register: vi.fn(),
         login: vi.fn(),
         refresh: vi.fn(),
+        changePassword : vi.fn(),
         logout: vi.fn(),
         logoutAll: vi.fn(),
     },
@@ -14,6 +15,7 @@ import authController from '../../../src/controllers/auth.controller.js'
 import authService from '../../../src/services/auth.service.js'
 import { AuthRequest } from '../../../src/middleware/auth.middleware.js'
 import { Types } from 'mongoose'
+import { ChangePasswordDto } from '../../../src/validations/auth.validation.js'
 
 describe('AuthController', () => {
 
@@ -313,10 +315,113 @@ describe('AuthController', () => {
         })
     })
 
+    describe('changePassword', () => {
+
+        test('should change password successfully', async () => {
+            const userId = new Types.ObjectId()
+            const jti = 'session-jti'
+
+            const changePasswordData = {
+                oldPassword : 'old-password',
+                newPassword : 'new-password'
+            } as ChangePasswordDto
+
+            const req = {
+                user: {
+                    userId,
+                    jti,
+                    username: 'erfankal',
+                    role: 'User',
+                },
+                validated : {
+                    body : changePasswordData
+                }
+            } as any
+
+            const res = {
+                status: vi.fn().mockReturnThis(),
+                json: vi.fn(),
+            } as any
+
+            const next = vi.fn()
+
+            vi.mocked(authService.changePassword)
+                .mockResolvedValue(undefined)
+
+            await authController.changePassword(req, res, next)
+
+            expect(authService.changePassword)
+                .toHaveBeenCalledWith(
+                    userId,
+                    changePasswordData
+                )
+
+            expect(res.status)
+                .toHaveBeenCalledWith(200)
+
+            expect(res.json)
+                .toHaveBeenCalledWith({
+                    success: true,
+                    msg: 'Password Changed Successfully',
+                    data : null,
+                })
+
+            expect(next)
+                .not.toHaveBeenCalled()
+        })
+
+        test('should pass error to next if change fails', async () => {
+            const error = new Error('Change failed')
+            const userId = new Types.ObjectId()
+            const jti = 'session-jti'
+
+            const changePasswordData = {
+                oldPassword : 'old-password',
+                newPassword : 'new-password'
+            } as ChangePasswordDto
+
+            const req = {
+                user: {
+                    userId,
+                    jti,
+                    username: 'erfankal',
+                    role: 'User',
+                },
+                validated : {
+                    body : changePasswordData
+                }
+            } as any
+
+            const res = {
+                status: vi.fn().mockReturnThis(),
+                json: vi.fn(),
+            } as any
+
+            const next = vi.fn()
+
+            vi.mocked(authService.changePassword)
+                .mockRejectedValue(error)
+
+            await authController.changePassword(req, res, next)
+
+            expect(next)
+                .toHaveBeenCalledTimes(1)
+
+            expect(next)
+                .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
+        })
+    })
+
     describe('logout', () => {
 
         test('should logout user successfully', async () => {
-            const userId = new (await import('mongoose')).Types.ObjectId()
+            const userId = new Types.ObjectId()
             const jti = 'session-jti'
 
             const req = {
@@ -361,7 +466,7 @@ describe('AuthController', () => {
         })
 
         test('should pass error to next if logout fails', async () => {
-            const userId = new (await import('mongoose')).Types.ObjectId()
+            const userId = new Types.ObjectId()
             const jti = 'session-jti'
 
             const error = new Error('Logout failed')
@@ -404,7 +509,7 @@ describe('AuthController', () => {
     describe('logoutAll', () => {
 
         test('should logout all sessions successfully', async () => {
-            const userId = new (await import('mongoose')).Types.ObjectId()
+            const userId = new Types.ObjectId()
 
             const req = {
                 user: {
@@ -445,7 +550,7 @@ describe('AuthController', () => {
         })
 
         test('should pass error to next if logoutAll fails', async () => {
-            const userId = new (await import('mongoose')).Types.ObjectId()
+            const userId = new Types.ObjectId()
 
             const error = new Error('Logout all failed')
 
