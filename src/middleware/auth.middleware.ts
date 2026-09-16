@@ -49,8 +49,9 @@ export const authMiddleware = async (req : AuthRequest, res : Response, next : N
 
         next()
     } catch (error) {
-        if (error instanceof UnauthorizedError)
-            next(error)
+        if (error instanceof UnauthorizedError || error instanceof ForbiddenError)
+            return next(error)
+        
         req.logger.error({ error }, 'Auth Middleware Error')
         next(new UnauthorizedError())
     }
