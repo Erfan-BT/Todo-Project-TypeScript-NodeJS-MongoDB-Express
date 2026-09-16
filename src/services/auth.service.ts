@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 import authRepository from "../repository/auth.repository.js";
-import { BadRequestError, ConflictError, ForbiddenError } from "../utils/appError.js";
-import { LoginDto, RegisterDto } from "../validations/auth.validation.js";
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../utils/appError.js";
+import { ChangePasswordDto, LoginDto, RegisterDto } from "../validations/auth.validation.js";
 import tokenService from "./token.service.js";
 import {  Types } from "mongoose";
 import sessionRepository from "../repository/session.repository.js";
@@ -121,6 +121,31 @@ class AuthService {
             userId : decode.userId,
             tokens
         }
+    }
+
+    async changePassword (userId : Types.ObjectId, changePasswordData : ChangePasswordDto)
+    : Promise<void> {
+        // Check Passwords
+        if (changePasswordData.oldPassword === changePasswordData.newPassword)
+            throw new BadRequestError('The Old Password And The New Password Can Not Be The Same')
+
+        // Check Old Password
+        const hashedOldPassword = (await authRepository.getUserById(userId))?.password
+        if (!hashedOldPassword)
+            throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        const checkPassword = await argon2.verify(hashedOldPassword, changePasswordData.oldPassword)
+        if (!checkPassword)
+            throw new BadRequestError('The Old Password Is InCorrect')
+
+        // Hash New Password
+        const hashedNewPassword = await argon2.hash(changePasswordData.newPassword)
+
+        // Change Password
+        if (!await authRepository.changePassword(userId, hashedNewPassword))
+            throw new BadRequestError('Password Not Changed')
+
+        return
     }
 
     async logout (userId : Types.ObjectId, jti : string)

@@ -24,6 +24,14 @@ class AuthRepository {
     : Promise<IUser> {
         return await User.create(data)
     }
+
+    async changePassword (userId : Types.ObjectId, password : string)
+    : Promise<boolean> {
+        const result = await User.updateOne({_id : userId}, {
+            password
+        })
+        return result.modifiedCount === 1
+    }
 }
 
 export default new AuthRepository()

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { LoginDto, RefreshTokenDto, RegisterDto } from "../validations/auth.validation.js";
+import { ChangePasswordDto, LoginDto, RefreshTokenDto, RegisterDto } from "../validations/auth.validation.js";
 import authService from "../services/auth.service.js";
 import { AuthRequest } from "../middleware/auth.middleware.js";
 
@@ -46,6 +46,22 @@ class AuthController {
                 success : true,
                 msg : 'New Tokens Created',
                 data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async changePassword (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const changePasswordData = req.validated.body as ChangePasswordDto
+            const { userId } = req.user!
+            const data = await authService.changePassword(userId, changePasswordData)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Password Changed Successfully',
+                data : null
             })
         } catch (error) {
             next(error)
