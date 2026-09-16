@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2022", "dom"],
     // "types": ["node", "express"],
+    "types": ["vitest/globals"],
     "outDir": "./dist",
     "rootDir": "./src",
     
@@ -23,4 +24,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
   },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "tests"
+  ],
 }
