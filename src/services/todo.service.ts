@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { TodoQSDto } from "../validations/todo.validation.js";
+import { CreateTodoDto, TodoQSDto } from "../validations/todo.validation.js";
 import { TodoQuaryBuilder } from "../builders/todo.quary.builder.js";
 import todoRepository from "../repository/todo.repository.js";
 import { ITodo } from "../models/todo.model.js";
@@ -17,12 +17,18 @@ class TodoService {
 
     async getUserTodo (todoId : Types.ObjectId, userId : Types.ObjectId)
     : Promise<ITodo> {
-        // Get Tdod
+        // Get Todo
         const todo = await todoRepository.getUserTodo(userId, todoId)
         if (!todo)
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         return todo
+    }
+
+    async createTodo (userId : Types.ObjectId, todoData : CreateTodoDto)
+    : Promise<ITodo> {
+        // Create Todo
+        return await todoRepository.createTodo(userId, todoData)
     }
 }
 

@@ -1,5 +1,5 @@
 import z, { string } from "zod";
-import { TodoSort, TodoSortType } from "../types/todo.enum.js";
+import { TodoSort, TodoSortType, TodoStatus } from "../types/todo.enum.js";
 import { Types } from "mongoose";
 
 export const todoQS = z.object({
@@ -12,7 +12,7 @@ export const todoQS = z.object({
     q : z.string().trim().max(50, 'Max Characters : 50').optional(),
 
     priority : z.coerce.number().int().positive().max(10, 'Max Pariority : 10').optional(),
-    status : z.enum(['Pending', 'Completed', 'Canceled']).optional(),
+    status : z.enum(TodoStatus).optional(),
 
     username : z.string().trim().max(50, 'Max Characters : 50').optional(),
 
@@ -54,5 +54,13 @@ export const todoIdSchema = z.object({
     todoId : z.string().trim().refine(Types.ObjectId.isValid, 'Invalid ObjectId').transform(v => new Types.ObjectId(v))
 })
 
+export const createTodoSchema = z.object({
+    title : z.string().trim().min(1, 'At Least A Character Is Required').max(100, 'Max Characters : 100'),
+    description : z.string().trim().min(1, 'At Least A Character Is Required').max(255, 'Max Characters : 255'),
+    status : z.enum(TodoStatus).default(TodoStatus.PENDING),
+    priority : z.coerce.number().int().positive().max(10, 'Max Priority : 10'),
+})
+
 export type TodoQSDto = z.infer<typeof todoQS>
 export type TodoIdDto = z.infer<typeof todoIdSchema>
+export type CreateTodoDto = z.infer<typeof createTodoSchema>

@@ -1,11 +1,12 @@
 import { Schema, Types } from "mongoose";
+import { TodoStatus } from "../types/todo.enum.js";
 
 export interface ITodo {
     _id : Types.ObjectId;
     title : string;
     description : string;
     userId : Types.ObjectId;
-    status : 'Pending' | 'Completed' | 'Canceled';
+    status : TodoStatus;
     priority : number;
     dueDate : Date | null;
     createdAt : Date;
@@ -30,9 +31,9 @@ export const todoSchema = new Schema<ITodo>(
         },
         status : {
             type : String,
-            enum : ['Pending', 'Complated', 'Canceled'],
+            enum : TodoStatus,
             required : false,
-            default : "Pending"
+            default : TodoStatus.PENDING
         },
         priority : {
             type : Number,

@@ -1,6 +1,7 @@
 import { Types } from "mongoose"
 import { Todo } from "../models/index.js"
 import { ITodo } from "../models/todo.model.js"
+import { CreateTodoDto } from "../validations/todo.validation.js"
 
 class TodoRepository {
     async getUserTodos (userId : Types.ObjectId, limit : number, skip : number, where : any, sort : any)
@@ -23,6 +24,14 @@ class TodoRepository {
             _id : todoId,
         })
         .lean()
+    }
+
+    async createTodo (userId : Types.ObjectId, todoData : CreateTodoDto)
+    : Promise<ITodo> {
+        return await Todo.create({
+            userId,
+            ...todoData
+        })
     }
 }
 
