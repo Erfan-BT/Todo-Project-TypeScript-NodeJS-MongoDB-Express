@@ -33,6 +33,17 @@ class TodoRepository {
             ...todoData
         })
     }
+
+    async changeTodo (todoId : Types.ObjectId, userId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority'>>)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            userId,
+            deletedAt : null
+        }, data)
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new TodoRepository()

@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
-import { CreateTodoDto, TodoQSDto } from "../validations/todo.validation.js";
+import { ChangeTodoDto, CreateTodoDto, TodoQSDto } from "../validations/todo.validation.js";
 import { TodoQuaryBuilder } from "../builders/todo.quary.builder.js";
 import todoRepository from "../repository/todo.repository.js";
 import { ITodo } from "../models/todo.model.js";
-import { NotFoundError } from "../utils/appError.js";
+import { ConflictError, NotFoundError } from "../utils/appError.js";
 
 class TodoService {
     async getUserTodos (qs : TodoQSDto, userId : Types.ObjectId)
@@ -29,6 +29,35 @@ class TodoService {
     : Promise<ITodo> {
         // Create Todo
         return await todoRepository.createTodo(userId, todoData)
+    }
+
+    async changeTodo (userId : Types.ObjectId, todoId : Types.ObjectId, todoData : ChangeTodoDto)
+    : Promise<ChangeTodoDto> {
+        // Get Todo
+        const todo = await todoRepository.getUserTodo(userId, todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        // Create Data
+        const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority'>> = {}
+
+        if (todoData.title !== undefined && todoData.title !== todo.title)
+            data.title = todoData.title
+
+        if (todoData.description !== undefined && todoData.description !== todo.description)
+            data.description = todoData.description
+
+        if (todoData.priority !== undefined && todoData.priority !== todo.priority)
+            data.priority = todoData.priority
+
+        if (!Object.keys(data).length)
+            return data
+
+        // Change Todo
+        if (!await todoRepository.changeTodo(todoId, userId, data))
+            throw new ConflictError('Todo Data Not Changed')
+
+        return data
     }
 }
 

@@ -61,6 +61,25 @@ export const createTodoSchema = z.object({
     priority : z.coerce.number().int().positive().max(10, 'Max Priority : 10'),
 })
 
+export const changeTodoSchema = z.object({
+    title : z.string().trim().min(1, 'At Least A Character Is Required').max(100, 'Max Characters : 100').optional(),
+    description : z.string().trim().min(1, 'At Least A Character Is Required').max(255, 'Max Characters : 255').optional(),
+    priority : z.coerce.number().int().positive().max(10, 'Max Priority : 10').optional(),
+})
+.superRefine((data, ctx) => {
+    if (
+        data.title === undefined &&
+        data.description === undefined &&
+        data.priority === undefined
+    ) {
+        ctx.addIssue({
+            code : z.ZodIssueCode.custom,
+            message : 'At Least One Of The Fields Is Required'
+        })
+    }
+})
+
 export type TodoQSDto = z.infer<typeof todoQS>
 export type TodoIdDto = z.infer<typeof todoIdSchema>
 export type CreateTodoDto = z.infer<typeof createTodoSchema>
+export type ChangeTodoDto = z.infer<typeof changeTodoSchema>
