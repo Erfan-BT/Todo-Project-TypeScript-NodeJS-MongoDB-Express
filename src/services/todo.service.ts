@@ -74,6 +74,20 @@ class TodoService {
 
         return status
     }
+
+    async deleteTodo (userId : Types.ObjectId, todoId : Types.ObjectId)
+    : Promise<void> {
+        // Get Todo
+        const todo = await todoRepository.getUserTodo(userId, todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        // Delete Todo (Soft)
+        if (!await todoRepository.deleteTodo(todoId, userId))
+            throw new ConflictError('Todo Not Deleted')
+
+        return
+    }
 }
 
 export default new TodoService()

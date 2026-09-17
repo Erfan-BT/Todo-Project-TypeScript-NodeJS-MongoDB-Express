@@ -11,5 +11,6 @@ router.get('/:todoId', authMiddleware, validate({ params : todoIdSchema }), todo
 router.post('/', authMiddleware, validate({ body : createTodoSchema }), todoController.createTodo)
 router.patch('/:todoId', authMiddleware, validate({ body : changeTodoSchema, params : todoIdSchema }), todoController.changeTodo)
 router.patch('/:todoId/status', authMiddleware, validate({ body : changeTodoStatusSchema, params : todoIdSchema }), todoController.changeTodoStatus)
+router.delete('/:todoId', authMiddleware, validate({ params : todoIdSchema }), todoController.deleteTodo)
 
 export default router

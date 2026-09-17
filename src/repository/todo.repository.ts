@@ -59,6 +59,19 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+
+    async deleteTodo (todoId : Types.ObjectId, userId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            userId,
+            deletedAt : null
+        }, {
+            deletedAt : new Date()
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new TodoRepository()

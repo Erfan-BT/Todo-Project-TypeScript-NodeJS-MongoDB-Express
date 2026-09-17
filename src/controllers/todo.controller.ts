@@ -85,6 +85,22 @@ class TodoController {
             next(error)
         }
     }
+
+    async deleteTodo (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.user!
+            const { todoId } = req.validated.params as TodoIdDto
+            await todoService.deleteTodo(userId, todoId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Todo Successfully Deleted',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new TodoController()
