@@ -1,10 +1,13 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import compression from 'compression'
 import helmet from 'helmet'
 import cors from 'cors'
 import { env } from './configs/env.config.js'
 
 import AuthRoutes from './routes/auth.routes.js'
+import { errorHandler } from './middleware/errorHandler.middleware.js'
+import { NotFoundError } from './utils/appError.js'
+import { loggerMiddleware } from './middleware/logger.middleware.js'
 
 const app = express()
 
@@ -29,6 +32,8 @@ app.use(express.urlencoded({
     extended:true
 }))
 
+app.use(loggerMiddleware)
+
 // ---------- Routes ----------
 // Health
 app.get('/health', (req: Request, res: Response) => {
@@ -44,9 +49,10 @@ app.get('/health', (req: Request, res: Response) => {
 app.use('/api/v1/auth', AuthRoutes)
 
 // Error Handler
-// app.use((req : Request , res : Response, next : NextFunction) => {
-//     next(new NotFoundError(req.method + ' => ' + req.path))
-// })
-// app.use(errorHandler)
+app.use((req : Request , res : Response, next : NextFunction) => {
+    next(new NotFoundError(req.method + ' => ' + req.path))
+})
+
+app.use(errorHandler)
 
 export default app
