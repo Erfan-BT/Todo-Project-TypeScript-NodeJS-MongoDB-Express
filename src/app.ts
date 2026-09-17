@@ -5,6 +5,7 @@ import cors from 'cors'
 import { env } from './configs/env.config.js'
 
 import AuthRoutes from './routes/auth.routes.js'
+import TodoRoutes from './routes/todo.routes.js'
 import { errorHandler } from './middleware/errorHandler.middleware.js'
 import { NotFoundError } from './utils/appError.js'
 import { loggerMiddleware } from './middleware/logger.middleware.js'
@@ -47,6 +48,7 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Main Routes
 app.use('/api/v1/auth', AuthRoutes)
+app.use('/api/v1/todos', TodoRoutes)
 
 // Error Handler
 app.use((req : Request , res : Response, next : NextFunction) => {
