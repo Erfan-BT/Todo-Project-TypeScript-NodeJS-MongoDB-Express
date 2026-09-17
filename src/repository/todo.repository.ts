@@ -2,6 +2,7 @@ import { Types } from "mongoose"
 import { Todo } from "../models/index.js"
 import { ITodo } from "../models/todo.model.js"
 import { CreateTodoDto } from "../validations/todo.validation.js"
+import { TodoStatus } from "../types/todo.enum.js"
 
 class TodoRepository {
     async getUserTodos (userId : Types.ObjectId, limit : number, skip : number, where : any, sort : any)
@@ -41,6 +42,20 @@ class TodoRepository {
             userId,
             deletedAt : null
         }, data)
+
+        return result.modifiedCount === 1
+    }
+
+    async changeTodoStatus (todoId : Types.ObjectId, userId : Types.ObjectId, currentStatus : TodoStatus, newStatus : TodoStatus)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            userId,
+            deletedAt : null,
+            status : currentStatus
+        }, {
+            status : newStatus,
+        })
 
         return result.modifiedCount === 1
     }

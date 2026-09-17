@@ -79,7 +79,12 @@ export const changeTodoSchema = z.object({
     }
 })
 
+export const changeTodoStatusSchema = z.object({
+    status : z.enum(TodoStatus).default(TodoStatus.COMPLETED)
+})
+
 export type TodoQSDto = z.infer<typeof todoQS>
 export type TodoIdDto = z.infer<typeof todoIdSchema>
 export type CreateTodoDto = z.infer<typeof createTodoSchema>
 export type ChangeTodoDto = z.infer<typeof changeTodoSchema>
+export type ChangeTodoStatusDto = z.infer<typeof changeTodoStatusSchema>
