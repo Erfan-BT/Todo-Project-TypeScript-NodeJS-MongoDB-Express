@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../middleware/auth.middleware.js";
-import { TodoQSDto } from "../validations/todo.validation.js";
+import { TodoIdDto, TodoQSDto } from "../validations/todo.validation.js";
 import todoService from "../services/todo.service.js";
 
 class TodoController {
@@ -13,6 +13,22 @@ class TodoController {
             res.status(200).json({
                 success : true,
                 msg : 'All User Todos Successfully Found',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async getUserTodo (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.user!
+            const { todoId } = req.validated.params as TodoIdDto
+            const data = await todoService.getUserTodo(todoId, userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Todo Successfully Found',
                 data
             })
         } catch (error) {

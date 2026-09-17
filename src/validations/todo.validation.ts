@@ -1,5 +1,6 @@
-import z from "zod";
+import z, { string } from "zod";
 import { TodoSort, TodoSortType } from "../types/todo.enum.js";
+import { Types } from "mongoose";
 
 export const todoQS = z.object({
     page : z.coerce.number().int().positive().default(1),
@@ -49,4 +50,9 @@ export const todoQS = z.object({
     }
 })
 
+export const todoIdSchema = z.object({
+    todoId : z.string().trim().refine(Types.ObjectId.isValid, 'Invalid ObjectId').transform(v => new Types.ObjectId(v))
+})
+
 export type TodoQSDto = z.infer<typeof todoQS>
+export type TodoIdDto = z.infer<typeof todoIdSchema>

@@ -14,7 +14,15 @@ class TodoRepository {
             .skip(skip)
             .limit(limit)
             .lean()
+    }
 
+    async getUserTodo (userId : Types.ObjectId, todoId : Types.ObjectId)
+    : Promise<ITodo | null> {
+        return Todo.findOne({
+            userId,
+            _id : todoId,
+        })
+        .lean()
     }
 }
 
