@@ -56,3 +56,18 @@ export const authMiddleware = async (req : AuthRequest, res : Response, next : N
         next(new UnauthorizedError())
     }
 }
+
+export const adminMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user
+        if (!user)
+            throw new UnauthorizedError('Login First')
+
+        if (user.role !== "Admin")
+            throw new ForbiddenError('Not Access')
+
+        next()
+    } catch (error) {
+        next(error)
+    }
+}
