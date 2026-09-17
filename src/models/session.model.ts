@@ -14,7 +14,7 @@ export interface ISession {
 export const sessionSchema = new Schema<ISession>(
     {
         userId : {
-            type : Schema.Types.ObjectId,
+            type : Types.ObjectId,
             ref : 'User',
             required : true
         },
