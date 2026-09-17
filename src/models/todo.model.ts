@@ -5,11 +5,12 @@ export interface ITodo {
     title : string;
     description : string;
     userId : Types.ObjectId;
-    status : 'Pending' | 'Complated' | 'Canceled';
+    status : 'Pending' | 'Completed' | 'Canceled';
     priority : number;
     dueDate : Date | null;
     createdAt : Date;
-    updatedAt : Date | null;
+    updatedAt : Date;
+    deletedAt : Date | null;
 }
 
 export const todoSchema = new Schema<ITodo>(
@@ -23,7 +24,7 @@ export const todoSchema = new Schema<ITodo>(
             required : true
         },
         userId : {
-            type : Types.ObjectId,
+            type : Schema.Types.ObjectId,
             required : true,
             ref : 'User'
         },
@@ -40,6 +41,11 @@ export const todoSchema = new Schema<ITodo>(
             max : 10
         },
         dueDate : {
+            type : Date,
+            required : false,
+            default : null
+        },
+        deletedAt : {
             type : Date,
             required : false,
             default : null

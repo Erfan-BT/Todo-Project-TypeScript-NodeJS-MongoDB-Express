@@ -7,14 +7,14 @@ export interface ISession {
     refreshTokenHash : string;
     expiresTime : string;
     createdAt : Date;
-    updatedAt : Date | null;
+    updatedAt : Date;
     device : string | null;
 }
 
 export const sessionSchema = new Schema<ISession>(
     {
         userId : {
-            type : Types.ObjectId,
+            type : Schema.Types.ObjectId,
             ref : 'User',
             required : true
         },

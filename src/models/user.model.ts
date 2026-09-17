@@ -8,7 +8,7 @@ export interface IUser {
     role : 'Admin' | 'User';
     active : boolean;
     createdAt : Date;
-    updatedAt : Date | null;
+    updatedAt : Date;
 }
 
 export const userSchema = new Schema<IUser>(
