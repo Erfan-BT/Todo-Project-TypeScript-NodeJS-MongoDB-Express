@@ -72,6 +72,18 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+    
+    async clearUserTodos (userId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await Todo.updateMany({
+            userId,
+            deletedAt : null
+        }, {
+            deletedAt : new Date()
+        })
+
+        return result.modifiedCount > 0
+    }
 }
 
 export default new TodoRepository()

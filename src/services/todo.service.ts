@@ -88,6 +88,15 @@ class TodoService {
 
         return
     }
+
+    async clearUserTodos (userId : Types.ObjectId,)
+    : Promise<void> {
+        // Delete Todos (Soft)
+        if (!await todoRepository.clearUserTodos(userId))
+            throw new ConflictError('User Todos Not Deleted')
+
+        return
+    }
 }
 
 export default new TodoService()
