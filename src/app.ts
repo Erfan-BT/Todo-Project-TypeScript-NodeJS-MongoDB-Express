@@ -6,6 +6,7 @@ import { env } from './configs/env.config.js'
 
 import AuthRoutes from './routes/auth.routes.js'
 import TodoRoutes from './routes/todo.routes.js'
+import AdminRoutes from './routes/admin/admin.routes.js'
 import { errorHandler } from './middleware/errorHandler.middleware.js'
 import { NotFoundError } from './utils/appError.js'
 import { loggerMiddleware } from './middleware/logger.middleware.js'
@@ -38,7 +39,7 @@ app.use(loggerMiddleware)
 // ---------- Routes ----------
 // Health
 app.get('/health', (req: Request, res: Response) => {
-    // req.logger.info('HEALTH')
+    req.logger.info('HEALTH')
     res.json({
         success : true,
         timestamp: new Date().toISOString(),
@@ -49,6 +50,7 @@ app.get('/health', (req: Request, res: Response) => {
 // Main Routes
 app.use('/api/v1/auth', AuthRoutes)
 app.use('/api/v1/todos', TodoRoutes)
+app.use('/api/v1/admin', AdminRoutes)
 
 // Error Handler
 app.use((req : Request , res : Response, next : NextFunction) => {
