@@ -3,7 +3,7 @@ import { ChangeTodoDto, CreateTodoDto, TodoQSDto } from "../validations/todo.val
 import { TodoQuaryBuilder } from "../builders/todo.quary.builder.js";
 import todoRepository from "../repository/todo.repository.js";
 import { ITodo } from "../models/todo.model.js";
-import { ConflictError, NotFoundError } from "../utils/appError.js";
+import { BadRequestError, ConflictError, NotFoundError } from "../utils/appError.js";
 import { TodoStatus } from "../types/todo.enum.js";
 
 class TodoService {
@@ -58,6 +58,9 @@ class TodoService {
         if (!todo)
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
+        if (todo.deletedAt !== null)
+            throw new BadRequestError('Can Not Change Deleted Todo')
+
         // Create Data
         const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>> = {}
 
@@ -90,6 +93,10 @@ class TodoService {
         if (!todo)
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
+        if (todo.deletedAt !== null)
+            throw new BadRequestError('Can Not Change Deleted Todo')
+
+        // Change Todo Status
         if (todo.status !== status)
             if (!await todoRepository.changeTodoStatus(todoId, userId, todo.status, status))
                 throw new ConflictError('Todo Status Not Changed')
