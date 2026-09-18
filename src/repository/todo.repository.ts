@@ -146,6 +146,21 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+
+    async changeAdminTodoStatus (todoId : Types.ObjectId, currentStatus : TodoStatus, newStatus : TodoStatus)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            status : currentStatus,
+            deletedAt : null
+        }, {
+            $set : {
+                status : newStatus
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new TodoRepository()

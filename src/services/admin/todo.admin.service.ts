@@ -4,8 +4,9 @@ import { ITodo } from "../../models/todo.model.js";
 import todoRepository from "../../repository/todo.repository.js";
 import { ChangeTodoDto, TodoQSDto } from "../../validations/todo.validation.js";
 import authRepository from "../../repository/auth.repository.js";
-import { ConflictError, NotFoundError } from "../../utils/appError.js";
+import { BadRequestError, ConflictError, NotFoundError } from "../../utils/appError.js";
 import { IUser } from "../../models/user.model.js";
+import { TodoStatus } from "../../types/todo.enum.js";
 
 class TodoAdminService {
     async getAllTodos (qs : TodoQSDto)
@@ -54,7 +55,7 @@ class TodoAdminService {
         if (!todo)
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
-        /// Create Data
+        // Create Data
         const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>> = {}
 
         if (todoData.title !== undefined && todoData.title !== todo.title)
@@ -77,6 +78,24 @@ class TodoAdminService {
             throw new ConflictError('Todo Not Changed')
 
         return data
+    }
+
+    async changeTodoStatus (todoId : Types.ObjectId, status : TodoStatus)
+    : Promise<TodoStatus> {
+        // Get Todo
+        const todo = await todoRepository.getAdminTodo(todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        if (todo.deletedAt !== null)
+            throw new BadRequestError('Can Not Change Deleted Todo')
+
+        // Change Todo Status
+        if (todo.status !== status)
+            if (!await todoRepository.changeAdminTodoStatus(todoId, todo.status, status))
+                throw new ConflictError('Todo Status Not Changed')
+
+        return status
     }
 }
 

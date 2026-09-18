@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
-import { ChangeTodoDto, TodoIdDto, TodoQSDto } from "../../validations/todo.validation.js";
+import { ChangeTodoDto, ChangeTodoStatusDto, TodoIdDto, TodoQSDto } from "../../validations/todo.validation.js";
 import todoAdminService from "../../services/admin/todo.admin.service.js";
 
 class TodoAdminController {
@@ -43,6 +43,22 @@ class TodoAdminController {
             res.status(200).json({
                 success : true,
                 msg : 'Todo Successfully Changed',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async changeTodoStatus (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { todoId } = req.validated.params as TodoIdDto
+            const { status } = req.validated.body as ChangeTodoStatusDto
+            const data = await todoAdminService.changeTodoStatus(todoId, status)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Todo Status Successfully Changed',
                 data
             })
         } catch (error) {
