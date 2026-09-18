@@ -124,7 +124,15 @@ class TodoRepository {
             .skip(skip)
             .limit(limit)
             .lean()
-    }  
+    }
+    
+    async getAdminTodo (todoId : Types.ObjectId)
+    : Promise<ITodo | null> {
+        return Todo.findOne({
+            _id : todoId
+        })
+        .lean()
+    }
 }
 
 export default new TodoRepository()
