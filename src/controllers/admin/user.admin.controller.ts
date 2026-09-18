@@ -49,6 +49,21 @@ class UserAdminController {
             next(error)
         }
     }
+
+    async changeUserStatus (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.validated.params as UserIdDto
+            const data = await userAdminService.changeUserStatus(userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Status Successfully Changed',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new UserAdminController()

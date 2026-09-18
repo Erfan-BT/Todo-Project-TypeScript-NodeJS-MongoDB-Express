@@ -50,6 +50,20 @@ class UserAdminService {
 
         return data
     }
+
+    async changeUserStatus (userId : Types.ObjectId)
+    : Promise<boolean> {
+        // Get User
+        const user = await authRepository.getUserById(userId)
+        if (!user)
+            throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        // Change User Status
+        if (!await authRepository.changeUserStatus(userId, user.active))
+            throw new ConflictError('User Status Not Changed')
+
+        return !user.active
+    }
 }
 
 export default new UserAdminService()

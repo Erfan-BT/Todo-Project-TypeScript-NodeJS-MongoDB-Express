@@ -61,6 +61,20 @@ class AuthRepository {
 
         return result.modifiedCount === 1
     }
+
+    async changeUserStatus (userId : Types.ObjectId, currentStatus : boolean)
+    : Promise<boolean> {
+        const result = await User.updateOne({
+            _id : userId,
+            active : currentStatus
+        }, {
+            $set : {
+                active : !currentStatus
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new AuthRepository()
