@@ -1,4 +1,5 @@
 import { UserSort, UserSortType } from "../types/user.enum.js"
+import { escapeRegex } from "../utils/escape.regex.js"
 import { UserQSDto } from "../validations/auth.validation.js"
 
 export class UserQuaryBuilder {
@@ -22,17 +23,18 @@ export class UserQuaryBuilder {
         let where = []
 
         if (qs.q !== undefined) {
+            const q = escapeRegex(qs.q)
             where.push({
                 $or: [
                     {
                         username : {
-                            $regex: qs.q,
+                            $regex: q,
                             $options: 'i'
                         }
                     },
                     {
                         fullname : {
-                            $regex: qs.q,
+                            $regex: q,
                             $options: 'i'
                         }
                     }

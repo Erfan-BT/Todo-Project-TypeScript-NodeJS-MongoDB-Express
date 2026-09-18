@@ -1,4 +1,5 @@
 import { TodoSort, TodoSortType } from "../types/todo.enum.js";
+import { escapeRegex } from "../utils/escape.regex.js";
 import { TodoQSDto } from "../validations/todo.validation.js";
 
 export class TodoQuaryBuilder {
@@ -22,17 +23,18 @@ export class TodoQuaryBuilder {
         let where = []
 
         if (qs.q !== undefined) {
+            const q = escapeRegex(qs.q)
             where.push({
                 $or: [
                     {
                         title: {
-                            $regex: qs.q,
+                            $regex: q,
                             $options: 'i'
                         }
                     },
                     {
                         description: {
-                            $regex: qs.q,
+                            $regex: q,
                             $options: 'i'
                         }
                     }
