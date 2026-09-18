@@ -9,6 +9,7 @@ export interface IUser {
     active : boolean;
     createdAt : Date;
     updatedAt : Date;
+    deletedAt : Date | null;
 }
 
 export const userSchema = new Schema<IUser>(
@@ -34,6 +35,12 @@ export const userSchema = new Schema<IUser>(
         active : {
             type : Boolean,
             default : true
+        },
+        deletedAt : {
+            type : Date,
+            required : false,
+            allowNull : true,
+            default : null
         }
     },
     {

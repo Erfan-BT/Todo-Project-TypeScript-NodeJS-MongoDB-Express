@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ForbiddenError, UnauthorizedError } from "../utils/appError.js";
+import { ForbiddenError, NotFoundError, UnauthorizedError } from "../utils/appError.js";
 import tokenService from "../services/token.service.js";
 import authRepository from "../repository/auth.repository.js";
 import sessionRepository from "../repository/session.repository.js";
@@ -33,6 +33,9 @@ export const authMiddleware = async (req : AuthRequest, res : Response, next : N
 
         if (!user.active)
             throw new ForbiddenError('This Account Has Been Deactivated')
+
+        if (user.deletedAt !== null)
+            throw new NotFoundError('User Not Found')
 
         // Get Session
         const session = await sessionRepository.getSession(userId, jti)
