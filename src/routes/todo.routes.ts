@@ -10,8 +10,8 @@ router.get('/', authMiddleware, validate({ query : todoQS }), todoController.get
 router.get('/:todoId', authMiddleware, validate({ params : todoIdSchema }), todoController.getUserTodo)
 router.post('/', authMiddleware, validate({ body : createTodoSchema }), todoController.createTodo)
 router.post('/restore/:todoId', authMiddleware, validate({ params : todoIdSchema }), todoController.restoreTodo)
-router.patch('/:todoId', authMiddleware, validate({ body : changeTodoSchema, params : todoIdSchema }), todoController.changeTodo)
 router.patch('/:todoId/status', authMiddleware, validate({ body : changeTodoStatusSchema, params : todoIdSchema }), todoController.changeTodoStatus)
+router.patch('/:todoId', authMiddleware, validate({ body : changeTodoSchema, params : todoIdSchema }), todoController.changeTodo)
 router.delete('/clear', authMiddleware, todoController.clearUserTodos)
 router.delete('/:todoId', authMiddleware, validate({ params : todoIdSchema }), todoController.deleteTodo)
 
