@@ -52,6 +52,22 @@ class TodoController {
         }
     }
 
+    async restoreTodo (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.user!
+            const { todoId } = req.validated.params as TodoIdDto
+            const data = await todoService.restoreTodo(userId, todoId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Todo Successfully Restored',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     async changeTodo (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { userId } = req.user!

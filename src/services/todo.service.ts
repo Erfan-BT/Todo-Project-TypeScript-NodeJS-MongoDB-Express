@@ -32,6 +32,25 @@ class TodoService {
         return await todoRepository.createTodo(userId, todoData)
     }
 
+    async restoreTodo (userId : Types.ObjectId, todoId : Types.ObjectId)
+    : Promise<ITodo> {
+        // Get Todo
+        const todo = await todoRepository.getUserTodo(userId, todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        // Todo Not Deleted
+        if (todo.deletedAt === null)
+            return todo
+
+        // Restore Deleted Todo
+        if (!await todoRepository.restoreTodo(todoId, userId))
+            throw new ConflictError('Todo Can Not Restored')
+
+        todo.deletedAt = null
+        return todo
+    }
+
     async changeTodo (userId : Types.ObjectId, todoId : Types.ObjectId, todoData : ChangeTodoDto)
     : Promise<ChangeTodoDto> {
         // Get Todo

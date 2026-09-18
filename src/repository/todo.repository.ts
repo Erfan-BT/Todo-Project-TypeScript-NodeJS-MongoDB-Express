@@ -72,6 +72,23 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+
+    async restoreTodo (todoId : Types.ObjectId, userId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            userId,
+            deletedAt : {
+                $ne : null
+            }
+        }, {
+            $set : {
+                deletedAt : null
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
     
     async clearUserTodos (userId : Types.ObjectId)
     : Promise<boolean> {
