@@ -1,5 +1,6 @@
 import z from "zod";
 import { UserSort, UserSortType } from "../types/user.enum.js";
+import { Types } from "mongoose";
 
 export const registerSchema = z.object({
     fullname : z.string().trim().min(4, 'At Least 4 Characters Are Required').max(50, 'Max Characters : 50'),
@@ -50,8 +51,13 @@ export const userQS = z.object({
     }
 })
 
+export const userIdSchema = z.object({
+    userId : z.string().trim().refine(Types.ObjectId.isValid, 'Invalid ObjectId').transform(v => new Types.ObjectId(v))
+})
+
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>
 export type ChangePasswordDto = z.infer<typeof changePasswordSchema>
 export type UserQSDto = z.infer<typeof userQS>
+export type UserIdDto = z.infer<typeof userIdSchema>
