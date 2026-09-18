@@ -95,6 +95,21 @@ class UserAdminController {
             next(error)
         }
     }
+
+    async restoreUser (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.validated.params as UserIdDto
+            const data = await userAdminService.restoreUser(userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Successfully Restored',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new UserAdminController()

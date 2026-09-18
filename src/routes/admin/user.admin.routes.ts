@@ -7,6 +7,7 @@ const router = express.Router()
 
 router.get('/', validate({ query : userQS }), userAdminController.getAllUsers)
 router.get('/:userId', validate({ params : userIdSchema }), userAdminController.getUser)
+router.post('/:userId/restore', validate({ params : userIdSchema }), userAdminController.restoreUser)
 router.patch('/:userId/password', validate({ params : userIdSchema, body : adminChangeUserPasswordSchema }), userAdminController.changeUserPassword)
 router.patch('/:userId/status', validate({ params : userIdSchema }), userAdminController.changeUserStatus)
 router.patch('/:userId', validate({ params : userIdSchema, body : changeUserSchema }), userAdminController.changeUser)

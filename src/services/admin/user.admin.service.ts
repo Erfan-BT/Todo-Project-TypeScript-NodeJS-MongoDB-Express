@@ -105,6 +105,25 @@ class UserAdminService {
 
         return
     }
+
+    async restoreUser (userId : Types.ObjectId)
+    : Promise<IUser> {
+        // Get User
+        const user = await authRepository.getAdminUserById(userId)
+        if (!user)
+            throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        if (user.deletedAt === null)
+            return user
+
+        // Restore User
+        if (!await authRepository.restoreUser(userId))
+            throw new ConflictError('User Not Restored')
+
+        user.deletedAt = null
+        user.active = true
+        return user
+    }
 }
 
 export default new UserAdminService()

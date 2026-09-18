@@ -78,7 +78,6 @@ class AuthRepository {
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
-            deletedAt : null
         }, {
             $set : {
                 ...data
@@ -112,6 +111,21 @@ class AuthRepository {
             $set : {
                 deletedAt : new Date(),
                 active : false
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
+
+    async restoreUser (userId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await User.updateOne({
+            _id : userId,
+            deletedAt : { $ne : null }
+        }, {
+            $set : {
+                deletedAt : null,
+                active : true
             }
         })
 
