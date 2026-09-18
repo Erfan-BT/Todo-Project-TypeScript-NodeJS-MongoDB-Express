@@ -80,6 +80,21 @@ class TodoAdminController {
             next(error)
         }
     }
+
+    async deleteHardTodo (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { todoId } = req.validated.params as TodoIdDto
+            await todoAdminService.deleteHardTodo(todoId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Todo Successfully Deleted (Hard)',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new TodoAdminController()

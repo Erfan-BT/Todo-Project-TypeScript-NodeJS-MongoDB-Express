@@ -4,7 +4,7 @@ import { ITodo } from "../../models/todo.model.js";
 import todoRepository from "../../repository/todo.repository.js";
 import { ChangeTodoDto, TodoQSDto } from "../../validations/todo.validation.js";
 import authRepository from "../../repository/auth.repository.js";
-import { BadRequestError, ConflictError, NotFoundError } from "../../utils/appError.js";
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../../utils/appError.js";
 import { IUser } from "../../models/user.model.js";
 import { TodoStatus } from "../../types/todo.enum.js";
 
@@ -110,6 +110,23 @@ class TodoAdminService {
 
         // Delete Todo
         if (!await todoRepository.deleteAdminSoftTodo(todoId))
+            throw new ConflictError('Todo Not Deleted')
+
+        return
+    }
+
+    async deleteHardTodo (todoId : Types.ObjectId)
+    : Promise<void> {
+        // Get Todo
+        const todo = await todoRepository.getAdminTodo(todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        if (todo.deletedAt === null)
+            throw new ForbiddenError('Soft Deleted Required First')
+
+        // Delete Todo (Hard)
+        if (!await todoRepository.deleteAdminHardTodo(todoId))
             throw new ConflictError('Todo Not Deleted')
 
         return

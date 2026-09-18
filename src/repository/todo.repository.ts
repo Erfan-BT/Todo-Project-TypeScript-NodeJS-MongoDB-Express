@@ -175,6 +175,16 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+
+    async deleteAdminHardTodo (todoId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await Todo.deleteOne({
+            _id : todoId,
+            deletedAt : { $ne : null }
+        })
+
+        return result.deletedCount === 1
+    }
 }
 
 export default new TodoRepository()
