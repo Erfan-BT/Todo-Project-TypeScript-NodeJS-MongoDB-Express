@@ -70,7 +70,7 @@ class TodoService {
         if (todoData.priority !== undefined && todoData.priority !== todo.priority)
             data.priority = todoData.priority
 
-        if (todoData.dueDate !== undefined && todoData.dueDate !== todo.dueDate)
+        if (todoData.dueDate !== undefined && todoData.dueDate.getTime() !== todo.dueDate.getTime())
             data.dueDate = todoData.dueDate
 
         if (!Object.keys(data).length)
