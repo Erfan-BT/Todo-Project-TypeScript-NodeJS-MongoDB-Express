@@ -111,6 +111,20 @@ class TodoRepository {
 
         return result.modifiedCount > 0
     }
+
+    // ----- Admin -----
+    async getAdminUserTodos (userId : Types.ObjectId | null, limit : number, skip : number, where : any, sort : any)
+    : Promise<ITodo[]> {
+        return Todo
+            .find({
+                ...(userId !== null ? {userId} : {}),
+                ...where
+            })
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .lean()
+    }  
 }
 
 export default new TodoRepository()

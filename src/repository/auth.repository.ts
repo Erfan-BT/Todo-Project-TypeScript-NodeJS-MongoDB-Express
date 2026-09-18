@@ -74,6 +74,15 @@ class AuthRepository {
         .lean()
     }
 
+    async getAdminUserByUsername (username : string)
+    : Promise<IUser | null> {
+        return await User.findOne({
+            username
+        })
+        .select('-password')
+        .lean()
+    }
+
     async changeUser (userId : Types.ObjectId, data : Partial<Pick<IUser, 'fullname' | 'username'>>)
     : Promise<boolean> {
         const result = await User.updateOne({
