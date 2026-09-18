@@ -7,6 +7,7 @@ const router = express.Router()
 
 router.get('/', validate({ query : todoQS }), todoAdminController.getAllTodos)
 router.get('/:todoId', validate({ params : todoIdSchema }), todoAdminController.getTodo)
+router.post('/:todoId/restore', validate({ params : todoIdSchema }), todoAdminController.restoreTodo)
 router.patch('/:todoId/status', validate({ params : todoIdSchema , body : changeTodoStatusSchema }), todoAdminController.changeTodoStatus)
 router.patch('/:todoId', validate({ params : todoIdSchema , body : changeTodoSchema }), todoAdminController.changeTodo)
 router.delete('/:todoId/hard-delete', validate({ params : todoIdSchema }), todoAdminController.deleteHardTodo)

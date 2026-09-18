@@ -115,6 +115,24 @@ class TodoAdminService {
         return
     }
 
+    async restoreTodo (todoId : Types.ObjectId)
+    : Promise<ITodo> {
+        // Get Todo
+        const todo = await todoRepository.getAdminTodo(todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        if (todo.deletedAt === null)
+            return todo
+
+        // Restore Todo
+        if (!await todoRepository.restoreAdminTodo(todoId))
+            throw new ConflictError('Todo Not Restored')
+
+        todo.deletedAt = null
+        return todo
+    }
+
     async deleteHardTodo (todoId : Types.ObjectId)
     : Promise<void> {
         // Get Todo
