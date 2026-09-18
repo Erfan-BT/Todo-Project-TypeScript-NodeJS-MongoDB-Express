@@ -32,6 +32,18 @@ class AuthRepository {
         })
         return result.modifiedCount === 1
     }
+
+    // ----- Admin -----
+    async getAllUsers (limit : number, skip : number, where : any, sort : any)
+    : Promise<IUser[]> {
+        return User
+            .find(where)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .select('-password')
+            .lean()
+    }
 }
 
 export default new AuthRepository()

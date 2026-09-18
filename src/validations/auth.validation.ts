@@ -1,4 +1,5 @@
 import z from "zod";
+import { UserSort, UserSortType } from "../types/user.enum.js";
 
 export const registerSchema = z.object({
     fullname : z.string().trim().min(4, 'At Least 4 Characters Are Required').max(50, 'Max Characters : 50'),
@@ -20,7 +21,37 @@ export const changePasswordSchema = z.object({
     newPassword : z.string().trim().min(8, 'At Least 8 Characters Are Required').max(100, 'Max Characters : 100')
 })
 
+export const userQS = z.object({
+    page : z.coerce.number().int().positive().default(1),
+    limit : z.coerce.number().int().positive().max(50).default(30),
+
+    sort : z.enum(UserSort).default(UserSort.CREATEDAT),
+    sortType : z.enum(UserSortType).default(UserSortType.DESC),
+
+    q : z.string().trim().max(50, 'Max Characters : 50').optional(),
+
+    status : z.coerce.boolean().optional(),
+    role : z.enum(['Admin', 'User']).optional(),
+
+    from : z.coerce.date().optional(),
+    to : z.coerce.date().optional(),
+})
+.superRefine((data, ctx) => {
+    if (
+        data.from !== undefined &&
+        data.to !== undefined &&
+        data.from.getTime() > data.to.getTime()
+    ) {
+        ctx.addIssue({
+            code : z.ZodIssueCode.custom,
+            path : ['to'],
+            message : 'To Date Must Be Greater Than Or Equal To From Date'
+        })
+    }
+})
+
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>
 export type ChangePasswordDto = z.infer<typeof changePasswordSchema>
+export type UserQSDto = z.infer<typeof userQS>
