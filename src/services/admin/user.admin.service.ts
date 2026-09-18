@@ -64,6 +64,23 @@ class UserAdminService {
 
         return !user.active
     }
+
+    async deleteUser (userId : Types.ObjectId)
+    : Promise<void> {
+        // Get User
+        const user = await authRepository.getUserById(userId)
+        if (!user)
+            throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        if (user.deletedAt !== null)
+            return
+
+        // Delete User
+        if (!await authRepository.deleteUser(userId))
+            throw new ConflictError('User Not Deleted')
+
+        return
+    }
 }
 
 export default new UserAdminService()

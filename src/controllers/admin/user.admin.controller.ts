@@ -64,6 +64,21 @@ class UserAdminController {
             next(error)
         }
     }
+
+    async deleteUser (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.validated.params as UserIdDto
+            await userAdminService.deleteUser(userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Successfully Deleted',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new UserAdminController()

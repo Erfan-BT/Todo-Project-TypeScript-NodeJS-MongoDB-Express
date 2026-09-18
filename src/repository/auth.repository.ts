@@ -75,6 +75,20 @@ class AuthRepository {
 
         return result.modifiedCount === 1
     }
+
+    async deleteUser (userId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await User.updateOne({
+            _id : userId,
+            deletedAt : null
+        }, {
+            $set : {
+                deletedAt : new Date()
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new AuthRepository()
