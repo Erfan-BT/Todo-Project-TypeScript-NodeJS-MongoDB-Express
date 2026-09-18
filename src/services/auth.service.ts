@@ -65,7 +65,8 @@ class AuthService {
             throw new ForbiddenError('This Account Has Been Deactivated')
 
         // Check Password
-        const checkPassword = await argon2.verify(user.password, loginData.password)
+        const userPassword = await authRepository.getUserPassword(user._id)
+        const checkPassword = await argon2.verify(userPassword, loginData.password)
         if (!checkPassword)
             throw new BadRequestError('Username Or Password Is Incorrect')
 
@@ -130,9 +131,11 @@ class AuthService {
             throw new BadRequestError('The Old Password And The New Password Can Not Be The Same')
 
         // Check Old Password
-        const hashedOldPassword = (await authRepository.getUserById(userId))?.password
-        if (!hashedOldPassword)
+        const user = await authRepository.getUserById(userId)
+        if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        const hashedOldPassword = await authRepository.getUserPassword(userId)
 
         const checkPassword = await argon2.verify(hashedOldPassword, changePasswordData.oldPassword)
         if (!checkPassword)

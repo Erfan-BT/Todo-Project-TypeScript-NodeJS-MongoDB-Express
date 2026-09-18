@@ -22,7 +22,7 @@ import { authMiddleware } from '../../../src/middleware/auth.middleware.js'
 import tokenService from '../../../src/services/token.service.js'
 import authRepository from '../../../src/repository/auth.repository.js'
 import sessionRepository from '../../../src/repository/session.repository.js'
-import { ForbiddenError, UnauthorizedError } from '../../../src/utils/appError.js'
+import { ForbiddenError, NotFoundError, UnauthorizedError } from '../../../src/utils/appError.js'
 import { Types } from 'mongoose'
 
 beforeEach(() => {
@@ -197,6 +197,60 @@ describe('authMiddleware', () => {
             .toBeUndefined()
     })
 
+    test('should return NotFoundError if user was deleted', async () => {
+
+        const userId = new Types.ObjectId()
+        const jti = 'session-jti'
+
+        const req = {
+            headers: {
+                authorization: 'Bearer access-token',
+            },
+            logger: {
+                error: vi.fn(),
+            },
+        } as any
+
+        const res = {} as any
+        const next = vi.fn()
+
+        vi.mocked(tokenService.verifyAccessToken)
+            .mockReturnValue({
+                userId,
+                jti,
+            } as any)
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue({
+                username: 'erfankal',
+                role: 'User',
+                active: true,
+                deletedAt : new Date()
+            } as any)
+
+        await authMiddleware(req, res, next)
+
+        expect(tokenService.verifyAccessToken)
+            .toHaveBeenCalledWith('access-token')
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(next)
+            .toHaveBeenCalledTimes(1)
+
+        expect(next)
+            .toHaveBeenCalledWith(
+                expect.any(NotFoundError)
+            )
+
+        expect(sessionRepository.getSession)
+            .not.toHaveBeenCalled()
+
+        expect(req.user)
+            .toBeUndefined()
+    })
+
     test('should return UnauthorizedError if session does not exist', async () => {
         const userId = new Types.ObjectId()
         const jti = 'session-jti'
@@ -224,6 +278,7 @@ describe('authMiddleware', () => {
                 username: 'erfankal',
                 role: 'User',
                 active: true,
+                deletedAt : null
             } as any)
 
         vi.mocked(sessionRepository.getSession)
@@ -324,6 +379,7 @@ describe('authMiddleware', () => {
                 username: 'erfankal',
                 role: 'User',
                 active: true,
+                deletedAt : null
             } as any)
 
         vi.mocked(sessionRepository.getSession)

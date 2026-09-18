@@ -9,6 +9,7 @@ class AuthRepository {
         return await User.findOne({
             username,
         })
+        .select('-password')
         .lean()
     }
 
@@ -17,7 +18,19 @@ class AuthRepository {
         return await User.findOne({
             _id : userId
         })
+        .select('-password')
         .lean()
+    }
+
+    async getUserPassword (userId : Types.ObjectId)
+    : Promise<string> {
+        return (await User.findOne({
+            _id : userId
+        })
+        .select('password')
+        .lean()
+        )!.password
+        
     }
 
     async createUser (data : RegisterDto)

@@ -4,6 +4,7 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
     default: {
         getUserById : vi.fn(),
         getUserByUsername: vi.fn(),
+        getUserPassword : vi.fn(),
         createUser: vi.fn(),
         changePassword : vi.fn()
     }
@@ -218,12 +219,14 @@ describe('AuthService.login', () => {
         const user = {
             _id: new Types.ObjectId(),
             username: 'erfankal',
-            password: 'hashed-password',
             active: true,
         }
 
         vi.mocked(authRepository.getUserByUsername)
             .mockResolvedValue(user as any)
+
+        vi.mocked(authRepository.getUserPassword)
+            .mockResolvedValue('hashed-password' as any)
 
         vi.mocked(argon2.verify)
             .mockResolvedValue(false)
@@ -262,7 +265,6 @@ describe('AuthService.login', () => {
         const user = {
             _id: userId,
             username: 'erfankal',
-            password: 'hashed-password',
             active: true,
         }
 
@@ -273,6 +275,9 @@ describe('AuthService.login', () => {
 
         vi.mocked(authRepository.getUserByUsername)
             .mockResolvedValue(user as any)
+
+        vi.mocked(authRepository.getUserPassword)
+            .mockResolvedValue('hashed-password')
 
         vi.mocked(argon2.verify)
             .mockResolvedValue(true)
@@ -508,7 +513,10 @@ describe('AuthService.changePassword', () => {
         } as ChangePasswordDto
 
         vi.mocked(authRepository.getUserById)
-            .mockResolvedValue({password : 'hashed-old-password'} as any)
+            .mockResolvedValue({} as any)
+
+        vi.mocked(authRepository.getUserPassword)
+            .mockResolvedValue('hashed-old-password')
 
         vi.mocked(argon2.verify)
             .mockResolvedValue(false)
@@ -541,7 +549,10 @@ describe('AuthService.changePassword', () => {
         } as ChangePasswordDto
 
         vi.mocked(authRepository.getUserById)
-            .mockResolvedValue({password : 'hashed-old-password'} as any)
+            .mockResolvedValue({} as any)
+
+        vi.mocked(authRepository.getUserPassword)
+            .mockResolvedValue('hashed-old-password')
 
         vi.mocked(argon2.verify)
             .mockResolvedValue(true)
@@ -583,7 +594,10 @@ describe('AuthService.changePassword', () => {
         } as ChangePasswordDto
 
         vi.mocked(authRepository.getUserById)
-            .mockResolvedValue({password : 'hashed-old-password'} as any)
+            .mockResolvedValue({} as any)
+
+        vi.mocked(authRepository.getUserPassword)
+            .mockResolvedValue('hashed-old-password')
 
         vi.mocked(argon2.verify)
             .mockResolvedValue(true)
