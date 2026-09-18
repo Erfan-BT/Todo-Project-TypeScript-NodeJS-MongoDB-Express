@@ -27,8 +27,12 @@ class AuthRepository {
 
     async changePassword (userId : Types.ObjectId, password : string)
     : Promise<boolean> {
-        const result = await User.updateOne({_id : userId}, {
-            password
+        const result = await User.updateOne({
+            _id : userId
+        }, {
+            $set : {
+                password
+            }
         })
         return result.modifiedCount === 1
     }
@@ -43,6 +47,19 @@ class AuthRepository {
             .limit(limit)
             .select('-password')
             .lean()
+    }
+
+    async changeUser (userId : Types.ObjectId, data : Partial<Pick<IUser, 'fullname' | 'username'>>)
+    : Promise<boolean> {
+        const result = await User.updateOne({
+            _id : userId
+        }, {
+            $set : {
+                ...data
+            }
+        })
+
+        return result.modifiedCount === 1
     }
 }
 

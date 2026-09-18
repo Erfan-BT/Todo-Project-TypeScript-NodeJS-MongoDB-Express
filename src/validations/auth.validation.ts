@@ -55,9 +55,26 @@ export const userIdSchema = z.object({
     userId : z.string().trim().refine(Types.ObjectId.isValid, 'Invalid ObjectId').transform(v => new Types.ObjectId(v))
 })
 
+export const changeUserSchema = z.object({
+    fullname : z.string().trim().min(4, 'At Least 4 Characters Are Required').max(50, 'Max Characters : 50').optional(),
+    username : z.string().trim().min(6, 'At Least 6 Characters Are Required').max(50, 'Max Characters : 50').optional(),
+})
+.superRefine((data, ctx) => {
+    if (
+        data.fullname === undefined &&
+        data.username === undefined
+    ) {
+        ctx.addIssue({
+            code : z.ZodIssueCode.custom,
+            message : 'At Least One Of The Fields Is Required'
+        })
+    }
+})
+
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>
 export type ChangePasswordDto = z.infer<typeof changePasswordSchema>
 export type UserQSDto = z.infer<typeof userQS>
 export type UserIdDto = z.infer<typeof userIdSchema>
+export type ChangeUserDto = z.infer<typeof changeUserSchema>

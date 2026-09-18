@@ -2,8 +2,8 @@ import { Types } from "mongoose";
 import { UserQuaryBuilder } from "../../builders/user.quary.builder.js";
 import { IUser } from "../../models/user.model.js";
 import authRepository from "../../repository/auth.repository.js";
-import { UserIdDto, UserQSDto } from "../../validations/auth.validation.js";
-import { NotFoundError } from "../../utils/appError.js";
+import { ChangeUserDto, UserIdDto, UserQSDto } from "../../validations/auth.validation.js";
+import { ConflictError, NotFoundError } from "../../utils/appError.js";
 
 class UserAdminService {
     async getAllUsers (qs : UserQSDto)
@@ -23,6 +23,32 @@ class UserAdminService {
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
         return user
+    }
+
+    async changeUser (userId : Types.ObjectId, userData : ChangeUserDto)
+    : Promise<ChangeUserDto> {
+        // Get User
+        const user = await authRepository.getUserById(userId)
+        if (!user)
+            throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        // Create Data
+        const data : Partial<Pick<IUser, 'fullname' | 'username'>> = {}
+
+        if (userData.fullname !== undefined && userData.fullname !== user.fullname)
+            data.fullname = userData.fullname
+
+        if (userData.username !== undefined && userData.username !== user.username)
+            data.username = userData.username
+
+        if (!Object.keys(data).length)
+            return data
+
+        // Change User
+        if (!await authRepository.changeUser(userId, data))
+            throw new ConflictError('User Not Changed')
+
+        return data
     }
 }
 
