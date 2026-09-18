@@ -71,6 +71,10 @@ export const changeUserSchema = z.object({
     }
 })
 
+export const adminChangeUserPasswordSchema = z.object({
+    newPassword : z.string().trim().min(8, 'At Least 8 Characters Are Required').max(100, 'Max Characters : 100')
+})
+
 export type RegisterDto = z.infer<typeof registerSchema>
 export type LoginDto = z.infer<typeof loginSchema>
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>
@@ -78,3 +82,4 @@ export type ChangePasswordDto = z.infer<typeof changePasswordSchema>
 export type UserQSDto = z.infer<typeof userQS>
 export type UserIdDto = z.infer<typeof userIdSchema>
 export type ChangeUserDto = z.infer<typeof changeUserSchema>
+export type AdminChangeUserPasswordDto = z.infer<typeof adminChangeUserPasswordSchema>

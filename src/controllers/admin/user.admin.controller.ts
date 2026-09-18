@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
-import { ChangeUserDto, UserIdDto, UserQSDto } from "../../validations/auth.validation.js";
+import { AdminChangeUserPasswordDto, ChangeUserDto, UserIdDto, UserQSDto } from "../../validations/auth.validation.js";
 import userAdminService from "../../services/admin/user.admin.service.js";
 
 class UserAdminController {
@@ -44,6 +44,22 @@ class UserAdminController {
                 success : true,
                 msg : 'User Successfully Changed',
                 data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    async changeUserPassword (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.validated.params as UserIdDto
+            const { newPassword } = req.validated.body as AdminChangeUserPasswordDto
+            await userAdminService.changeUserPassword(userId, newPassword)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Password Successfully Changed',
+                data : null
             })
         } catch (error) {
             next(error)
