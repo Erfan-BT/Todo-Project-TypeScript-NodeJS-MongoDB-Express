@@ -33,6 +33,7 @@ export const userQS = z.object({
 
     status : z.coerce.boolean().optional(),
     role : z.enum(['Admin', 'User']).optional(),
+    showDeleted : z.coerce.boolean().optional(),
 
     from : z.coerce.date().optional(),
     to : z.coerce.date().optional(),

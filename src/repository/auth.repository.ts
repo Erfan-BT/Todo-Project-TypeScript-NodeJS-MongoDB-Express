@@ -8,6 +8,7 @@ class AuthRepository {
     : Promise<IUser | null> {
         return await User.findOne({
             username,
+            deletedAt : null
         })
         .select('-password')
         .lean()
@@ -16,7 +17,8 @@ class AuthRepository {
     async getUserById (userId : Types.ObjectId)
     : Promise<IUser | null> {
         return await User.findOne({
-            _id : userId
+            _id : userId,
+            deletedAt : null
         })
         .select('-password')
         .lean()
@@ -25,7 +27,8 @@ class AuthRepository {
     async getUserPassword (userId : Types.ObjectId)
     : Promise<string> {
         return (await User.findOne({
-            _id : userId
+            _id : userId,
+            deletedAt : null
         })
         .select('password')
         .lean()
@@ -62,10 +65,20 @@ class AuthRepository {
             .lean()
     }
 
+    async getAdminUserById (userId : Types.ObjectId)
+    : Promise<IUser | null> {
+        return await User.findOne({
+            _id : userId,
+        })
+        .select('-password')
+        .lean()
+    }
+
     async changeUser (userId : Types.ObjectId, data : Partial<Pick<IUser, 'fullname' | 'username'>>)
     : Promise<boolean> {
         const result = await User.updateOne({
-            _id : userId
+            _id : userId,
+            deletedAt : null
         }, {
             $set : {
                 ...data
@@ -79,7 +92,8 @@ class AuthRepository {
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
-            active : currentStatus
+            active : currentStatus,
+            deletedAt : null
         }, {
             $set : {
                 active : !currentStatus
@@ -96,7 +110,8 @@ class AuthRepository {
             deletedAt : null
         }, {
             $set : {
-                deletedAt : new Date()
+                deletedAt : new Date(),
+                active : false
             }
         })
 

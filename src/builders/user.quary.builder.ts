@@ -52,6 +52,11 @@ export class UserQuaryBuilder {
                 role : qs.role
             })
 
+        if (qs.showDeleted !== undefined)
+            where.push({
+                deletedAt : qs.showDeleted ? { $ne: null } : null
+            })
+
         const dateCondition: {
             $gte ?: Date;
             $lte ?: Date;

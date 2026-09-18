@@ -3,7 +3,7 @@ import { UserQuaryBuilder } from "../../builders/user.quary.builder.js";
 import { IUser } from "../../models/user.model.js";
 import authRepository from "../../repository/auth.repository.js";
 import { ChangeUserDto, UserQSDto } from "../../validations/auth.validation.js";
-import { ConflictError, NotFoundError } from "../../utils/appError.js";
+import { ConflictError, ForbiddenError, NotFoundError } from "../../utils/appError.js";
 import argon2 from "argon2";
 
 class UserAdminService {
@@ -19,7 +19,7 @@ class UserAdminService {
     async getUser (userId : Types.ObjectId)
     : Promise<IUser> {
         // Get User
-        const user = await authRepository.getUserById(userId)
+        const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
@@ -29,7 +29,7 @@ class UserAdminService {
     async changeUser (userId : Types.ObjectId, userData : ChangeUserDto)
     : Promise<ChangeUserDto> {
         // Get User
-        const user = await authRepository.getUserById(userId)
+        const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
@@ -55,9 +55,12 @@ class UserAdminService {
     async changeUserPassword (userId : Types.ObjectId, newPassword : string)
     : Promise<void> {
         // Get User
-        const user = await authRepository.getUserById(userId)
+        const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        if (user.deletedAt !== null)
+            throw new ForbiddenError('Can Not Change Deleted User Password')
 
         // Hash Password
         const hashedNewPassword = await argon2.hash(newPassword)
@@ -72,9 +75,12 @@ class UserAdminService {
     async changeUserStatus (userId : Types.ObjectId)
     : Promise<boolean> {
         // Get User
-        const user = await authRepository.getUserById(userId)
+        const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
+
+        if (user.deletedAt !== null)
+            throw new ForbiddenError('Can Not Change Deleted User Status')
 
         // Change User Status
         if (!await authRepository.changeUserStatus(userId, user.active))
@@ -86,7 +92,7 @@ class UserAdminService {
     async deleteUser (userId : Types.ObjectId)
     : Promise<void> {
         // Get User
-        const user = await authRepository.getUserById(userId)
+        const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
