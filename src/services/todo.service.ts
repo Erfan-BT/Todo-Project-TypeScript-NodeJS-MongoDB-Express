@@ -40,7 +40,7 @@ class TodoService {
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         // Create Data
-        const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority'>> = {}
+        const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>> = {}
 
         if (todoData.title !== undefined && todoData.title !== todo.title)
             data.title = todoData.title
@@ -50,6 +50,9 @@ class TodoService {
 
         if (todoData.priority !== undefined && todoData.priority !== todo.priority)
             data.priority = todoData.priority
+
+        if (todoData.dueDate !== undefined && todoData.dueDate !== todo.dueDate)
+            data.dueDate = todoData.dueDate
 
         if (!Object.keys(data).length)
             return data

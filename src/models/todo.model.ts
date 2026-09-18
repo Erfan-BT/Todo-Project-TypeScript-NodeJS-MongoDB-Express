@@ -8,7 +8,7 @@ export interface ITodo {
     userId : Types.ObjectId;
     status : TodoStatus;
     priority : number;
-    dueDate : Date | null;
+    dueDate : Date;
     createdAt : Date;
     updatedAt : Date;
     deletedAt : Date | null;
@@ -43,8 +43,7 @@ export const todoSchema = new Schema<ITodo>(
         },
         dueDate : {
             type : Date,
-            required : false,
-            default : null
+            required : true,
         },
         deletedAt : {
             type : Date,

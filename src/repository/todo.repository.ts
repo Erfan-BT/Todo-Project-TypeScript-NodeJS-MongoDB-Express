@@ -35,7 +35,7 @@ class TodoRepository {
         })
     }
 
-    async changeTodo (todoId : Types.ObjectId, userId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority'>>)
+    async changeTodo (todoId : Types.ObjectId, userId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>>)
     : Promise<boolean> {
         const result = await Todo.updateOne({
             _id : todoId,

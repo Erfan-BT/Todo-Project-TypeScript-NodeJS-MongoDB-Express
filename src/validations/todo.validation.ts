@@ -59,18 +59,21 @@ export const createTodoSchema = z.object({
     description : z.string().trim().min(1, 'At Least A Character Is Required').max(255, 'Max Characters : 255'),
     status : z.enum(TodoStatus).default(TodoStatus.PENDING),
     priority : z.coerce.number().int().positive().max(10, 'Max Priority : 10'),
+    dueDate : z.coerce.date()
 })
 
 export const changeTodoSchema = z.object({
     title : z.string().trim().min(1, 'At Least A Character Is Required').max(100, 'Max Characters : 100').optional(),
     description : z.string().trim().min(1, 'At Least A Character Is Required').max(255, 'Max Characters : 255').optional(),
     priority : z.coerce.number().int().positive().max(10, 'Max Priority : 10').optional(),
+    dueDate : z.coerce.date().optional()
 })
 .superRefine((data, ctx) => {
     if (
         data.title === undefined &&
         data.description === undefined &&
-        data.priority === undefined
+        data.priority === undefined &&
+        data.dueDate === undefined
     ) {
         ctx.addIssue({
             code : z.ZodIssueCode.custom,
