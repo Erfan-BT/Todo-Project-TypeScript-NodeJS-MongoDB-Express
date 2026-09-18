@@ -65,6 +65,21 @@ class TodoAdminController {
             next(error)
         }
     }
+
+    async deleteSoftTodo (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { todoId } = req.validated.params as TodoIdDto
+            await todoAdminService.deleteSoftTodo(todoId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Todo Successfully Deleted (Soft)',
+                data : null
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new TodoAdminController()

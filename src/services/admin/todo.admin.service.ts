@@ -97,6 +97,23 @@ class TodoAdminService {
 
         return status
     }
+
+    async deleteSoftTodo (todoId : Types.ObjectId)
+    : Promise<void> {
+        // Get Todo
+        const todo = await todoRepository.getAdminTodo(todoId)
+        if (!todo)
+            throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
+
+        if (todo.deletedAt !== null)
+            return
+
+        // Delete Todo
+        if (!await todoRepository.deleteAdminSoftTodo(todoId))
+            throw new ConflictError('Todo Not Deleted')
+
+        return
+    }
 }
 
 export default new TodoAdminService()

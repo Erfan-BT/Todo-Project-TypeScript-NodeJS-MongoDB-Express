@@ -161,6 +161,20 @@ class TodoRepository {
 
         return result.modifiedCount === 1
     }
+
+    async deleteAdminSoftTodo (todoId : Types.ObjectId)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+            deletedAt : null
+        }, {
+            $set : {
+                deletedAt : new Date(),
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new TodoRepository()
