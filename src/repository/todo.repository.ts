@@ -8,10 +8,10 @@ class TodoRepository {
     async getUserTodos (userId : Types.ObjectId, limit : number, skip : number, where : any, sort : any)
     : Promise<ITodo[]> {
         return Todo
-            .find(
+            .find({
                 userId,
                 ...where
-            )
+            })
             .sort(sort)
             .skip(skip)
             .limit(limit)
@@ -41,7 +41,11 @@ class TodoRepository {
             _id : todoId,
             userId,
             deletedAt : null
-        }, data)
+        }, {
+            $set : {
+                ...data
+            }
+        })
 
         return result.modifiedCount === 1
     }
@@ -54,7 +58,9 @@ class TodoRepository {
             deletedAt : null,
             status : currentStatus
         }, {
-            status : newStatus,
+            $set : {
+                status : newStatus
+            }
         })
 
         return result.modifiedCount === 1
@@ -67,7 +73,9 @@ class TodoRepository {
             userId,
             deletedAt : null
         }, {
-            deletedAt : new Date()
+            $set : {
+                deletedAt : new Date()
+            }
         })
 
         return result.modifiedCount === 1
@@ -96,7 +104,9 @@ class TodoRepository {
             userId,
             deletedAt : null
         }, {
-            deletedAt : new Date()
+            $set : {
+                deletedAt : new Date()
+            }
         })
 
         return result.modifiedCount > 0
