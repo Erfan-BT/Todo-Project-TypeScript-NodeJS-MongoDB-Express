@@ -133,6 +133,19 @@ class TodoRepository {
         })
         .lean()
     }
+
+    async changeAdminTodo (todoId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>>)
+    : Promise<boolean> {
+        const result = await Todo.updateOne({
+            _id : todoId,
+        }, {
+            $set : {
+                ...data
+            }
+        })
+
+        return result.modifiedCount === 1
+    }
 }
 
 export default new TodoRepository()
