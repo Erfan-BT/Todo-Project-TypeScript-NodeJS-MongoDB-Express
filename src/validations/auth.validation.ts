@@ -73,7 +73,8 @@ export const changeUserSchema = z.object({
 })
 
 export const adminChangeUserPasswordSchema = z.object({
-    newPassword : z.string().trim().min(8, 'At Least 8 Characters Are Required').max(100, 'Max Characters : 100')
+    newPassword : z.string().trim().min(8, 'At Least 8 Characters Are Required').max(100, 'Max Characters : 100'),
+    reason : z.string().trim().min(3).max(200)
 })
 
 export type RegisterDto = z.infer<typeof registerSchema>

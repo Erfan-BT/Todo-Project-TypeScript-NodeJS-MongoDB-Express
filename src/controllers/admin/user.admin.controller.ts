@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
 import { AdminChangeUserPasswordDto, ChangeUserDto, UserIdDto, UserQSDto } from "../../validations/auth.validation.js";
 import userAdminService from "../../services/admin/user.admin.service.js";
+import { ReasonDto } from "../../validations/audit.validation.js";
 
 class UserAdminController {
     async getAllUsers (req : AuthRequest, res : Response, next : NextFunction) {
@@ -38,7 +39,8 @@ class UserAdminController {
         try {
             const { userId } = req.validated.params as UserIdDto
             const userData = req.validated.body as ChangeUserDto
-            const data = await userAdminService.changeUser(userId, userData)
+            const adminId = req.user!.userId
+            const data = await userAdminService.changeUser(userId, userData, adminId, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -53,8 +55,9 @@ class UserAdminController {
     async changeUserPassword (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { userId } = req.validated.params as UserIdDto
-            const { newPassword } = req.validated.body as AdminChangeUserPasswordDto
-            await userAdminService.changeUserPassword(userId, newPassword)
+            const { newPassword, reason } = req.validated.body as AdminChangeUserPasswordDto
+            const adminId = req.user!.userId
+            await userAdminService.changeUserPassword(userId, newPassword, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -69,7 +72,9 @@ class UserAdminController {
     async changeUserStatus (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { userId } = req.validated.params as UserIdDto
-            const data = await userAdminService.changeUserStatus(userId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            const data = await userAdminService.changeUserStatus(userId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -84,7 +89,9 @@ class UserAdminController {
     async deleteUser (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { userId } = req.validated.params as UserIdDto
-            await userAdminService.deleteUser(userId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            await userAdminService.deleteUser(userId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -99,7 +106,9 @@ class UserAdminController {
     async restoreUser (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { userId } = req.validated.params as UserIdDto
-            const data = await userAdminService.restoreUser(userId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            const data = await userAdminService.restoreUser(userId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,

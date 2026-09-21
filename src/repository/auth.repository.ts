@@ -1,4 +1,4 @@
-import { Types } from "mongoose"
+import { ClientSession, Types } from "mongoose"
 import { User } from "../models/index.js"
 import { IUser } from "../models/user.model.js"
 import { RegisterDto } from "../validations/auth.validation.js"
@@ -41,7 +41,7 @@ class AuthRepository {
         return await User.create(data)
     }
 
-    async changePassword (userId : Types.ObjectId, password : string)
+    async changePassword (userId : Types.ObjectId, password : string, session : ClientSession)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId
@@ -49,6 +49,8 @@ class AuthRepository {
             $set : {
                 password
             }
+        }, {
+            session
         })
         return result.modifiedCount === 1
     }
@@ -83,7 +85,7 @@ class AuthRepository {
         .lean()
     }
 
-    async changeUser (userId : Types.ObjectId, data : Partial<Pick<IUser, 'fullname' | 'username'>>)
+    async changeUser (userId : Types.ObjectId, data : Partial<Pick<IUser, 'fullname' | 'username'>>, session : ClientSession)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
@@ -91,12 +93,14 @@ class AuthRepository {
             $set : {
                 ...data
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async changeUserStatus (userId : Types.ObjectId, currentStatus : boolean)
+    async changeUserStatus (userId : Types.ObjectId, currentStatus : boolean, session : ClientSession)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
@@ -106,12 +110,14 @@ class AuthRepository {
             $set : {
                 active : !currentStatus
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async deleteUser (userId : Types.ObjectId)
+    async deleteUser (userId : Types.ObjectId, session : ClientSession)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
@@ -121,12 +127,14 @@ class AuthRepository {
                 deletedAt : new Date(),
                 active : false
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async restoreUser (userId : Types.ObjectId)
+    async restoreUser (userId : Types.ObjectId, session : ClientSession)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId,
@@ -136,6 +144,8 @@ class AuthRepository {
                 deletedAt : null,
                 active : true
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1

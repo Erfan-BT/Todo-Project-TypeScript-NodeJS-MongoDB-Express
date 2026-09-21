@@ -1,10 +1,12 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { UserQuaryBuilder } from "../../builders/user.quary.builder.js";
 import { IUser } from "../../models/user.model.js";
 import authRepository from "../../repository/auth.repository.js";
 import { ChangeUserDto, UserQSDto } from "../../validations/auth.validation.js";
 import { ConflictError, ForbiddenError, NotFoundError } from "../../utils/appError.js";
 import argon2 from "argon2";
+import auditRepository from "../../repository/audit.repository.js";
+import { AuditAction, AuditEntityType } from "../../types/audit.enum.js";
 
 class UserAdminService {
     async getAllUsers (qs : UserQSDto)
@@ -26,7 +28,7 @@ class UserAdminService {
         return user
     }
 
-    async changeUser (userId : Types.ObjectId, userData : ChangeUserDto)
+    async changeUser (userId : Types.ObjectId, userData : ChangeUserDto, adminId : Types.ObjectId, ipAddress : string)
     : Promise<ChangeUserDto> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -45,14 +47,37 @@ class UserAdminService {
         if (!Object.keys(data).length)
             return data
 
-        // Change User
-        if (!await authRepository.changeUser(userId, data))
-            throw new ConflictError('User Not Changed')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Change User
+                if (!await authRepository.changeUser(userId, data, session))
+                    throw new ConflictError('User Not Changed')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.CHANGE,
+                    entityType : AuditEntityType.USER,
+                    entityId : userId,
+                    oldValue : {
+                        fullname : user.fullname,
+                        username : user.username
+                    },
+                    newValue : data,
+                    ipAddress
+                }, session)
+
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return data
     }
 
-    async changeUserPassword (userId : Types.ObjectId, newPassword : string)
+    async changeUserPassword (userId : Types.ObjectId, newPassword : string, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<void> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -65,14 +90,33 @@ class UserAdminService {
         // Hash Password
         const hashedNewPassword = await argon2.hash(newPassword)
 
-        // Change User Password
-        if (!await authRepository.changePassword(userId, hashedNewPassword))
-            throw new ConflictError('User Password Not Changed')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Change User Password
+                if (!await authRepository.changePassword(userId, hashedNewPassword, session))
+                    throw new ConflictError('User Password Not Changed')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.CHANGE_PASSWORD,
+                    entityType : AuditEntityType.USER,
+                    entityId : userId,
+                    reason,
+                    ipAddress
+                    }, session)
+
+                })
+        } finally {
+            await session.endSession()
+        }
 
         return
     }
 
-    async changeUserStatus (userId : Types.ObjectId)
+    async changeUserStatus (userId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<boolean> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -82,14 +126,33 @@ class UserAdminService {
         if (user.deletedAt !== null)
             throw new ForbiddenError('Can Not Change Deleted User Status')
 
-        // Change User Status
-        if (!await authRepository.changeUserStatus(userId, user.active))
-            throw new ConflictError('User Status Not Changed')
+        const session = await mongoose.startSession()
+        
+        try {
+            await session.withTransaction(async () => {
+                // Change User Status
+                if (!await authRepository.changeUserStatus(userId, user.active, session))
+                    throw new ConflictError('User Status Not Changed')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : user.active ? AuditAction.DEACTIVE : AuditAction.ACTIVE,
+                    entityType : AuditEntityType.USER,
+                    entityId : userId,
+                    reason,
+                    ipAddress
+                }, session)
+
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return !user.active
     }
 
-    async deleteUser (userId : Types.ObjectId)
+    async deleteUser (userId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<void> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -99,14 +162,33 @@ class UserAdminService {
         if (user.deletedAt !== null)
             return
 
-        // Delete User
-        if (!await authRepository.deleteUser(userId))
-            throw new ConflictError('User Not Deleted')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Delete User
+                if (!await authRepository.deleteUser(userId, session))
+                    throw new ConflictError('User Not Deleted')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.DELETE,
+                    entityType : AuditEntityType.USER,
+                    entityId : userId,
+                    reason,
+                    ipAddress
+                }, session)
+
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return
     }
 
-    async restoreUser (userId : Types.ObjectId)
+    async restoreUser (userId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<IUser> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -116,9 +198,28 @@ class UserAdminService {
         if (user.deletedAt === null)
             return user
 
-        // Restore User
-        if (!await authRepository.restoreUser(userId))
-            throw new ConflictError('User Not Restored')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Restore User
+                if (!await authRepository.restoreUser(userId, session))
+                    throw new ConflictError('User Not Restored')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.RESTORE,
+                    entityType : AuditEntityType.USER,
+                    entityId : userId,
+                    reason,
+                    ipAddress
+                }, session)
+
+            })
+        } finally {
+            await session.endSession()
+        }
 
         user.deletedAt = null
         user.active = true
