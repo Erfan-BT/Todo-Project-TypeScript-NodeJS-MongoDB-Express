@@ -1,4 +1,5 @@
-import { TodoSort, TodoSortType } from "../types/todo.enum.js";
+import { SortType } from "../types/sort.type.js";
+import { TodoSort } from "../types/todo.enum.js";
 import { escapeRegex } from "../utils/escape.regex.js";
 import { TodoQSDto } from "../validations/todo.validation.js";
 
@@ -97,7 +98,7 @@ export class TodoQuaryBuilder {
     }
 
     static buildOrder (qs : TodoQSDto) {
-        const sortType = qs.sortType === TodoSortType.ASC ? 1 : -1
+        const sortType = qs.sortType === SortType.ASC ? 1 : -1
         switch (qs.sort) {
             case TodoSort.CREATEDAT:
                 return { createdAt : sortType, _id: sortType }

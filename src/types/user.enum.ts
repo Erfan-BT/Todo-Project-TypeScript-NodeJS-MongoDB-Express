@@ -3,8 +3,3 @@ export enum UserSort {
     USERNAME = 'USERNAME',
     FULLNAME = 'FULLNAME'
 }
-
-export enum UserSortType {
-    ASC = 'ASC',
-    DESC = 'DESC'
-}

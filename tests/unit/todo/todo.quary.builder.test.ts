@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { TodoQuaryBuilder } from '../../../src/builders/todo.quary.builder.js'
 import {
     TodoSort,
-    TodoSortType,
     TodoStatus
 } from '../../../src/types/todo.enum.js'
 import { TodoQSDto } from '../../../src/validations/todo.validation.js'
+import { SortType } from '../../../src/types/sort.type.js'
 
 
 describe('TodoQuaryBuilder', () => {
@@ -18,7 +18,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'No'
             } as TodoQSDto
 
@@ -42,7 +42,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 q: 'typescript'
             } as TodoQSDto
@@ -78,7 +78,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 priority: 5
             } as TodoQSDto
@@ -101,7 +101,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 status: TodoStatus.COMPLETED
             } as TodoQSDto
@@ -124,7 +124,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'Yes'
             } as TodoQSDto
 
@@ -148,7 +148,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All'
             } as TodoQSDto
 
@@ -168,7 +168,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 from
             } as TodoQSDto
@@ -195,7 +195,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 to
             } as TodoQSDto
@@ -223,7 +223,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 from,
                 to
@@ -252,7 +252,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 dueFrom
             } as TodoQSDto
@@ -279,7 +279,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 dueTo
             } as TodoQSDto
@@ -307,7 +307,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 1,
                 limit: 15,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
                 showDeleted: 'All',
                 dueFrom,
                 dueTo
@@ -340,7 +340,7 @@ describe('TodoQuaryBuilder', () => {
                 page: 2,
                 limit: 10,
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
 
                 q: 'mongoose',
                 priority: 8,
@@ -409,7 +409,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.CREATEDAT,
-                sortType: TodoSortType.ASC
+                sortType: SortType.ASC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -425,7 +425,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.CREATEDAT,
-                sortType: TodoSortType.DESC
+                sortType: SortType.DESC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -441,7 +441,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.ASC
+                sortType: SortType.ASC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -457,7 +457,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC
+                sortType: SortType.DESC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -473,7 +473,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.DUEDATE,
-                sortType: TodoSortType.ASC
+                sortType: SortType.ASC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -489,7 +489,7 @@ describe('TodoQuaryBuilder', () => {
 
             const qs = {
                 sort: TodoSort.DUEDATE,
-                sortType: TodoSortType.DESC
+                sortType: SortType.DESC
             } as TodoQSDto
 
             const result = TodoQuaryBuilder.buildOrder(qs)
@@ -510,7 +510,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 10,
 
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
 
                 showDeleted: 'No',
 
@@ -572,7 +572,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 15,
 
                 sort: TodoSort.CREATEDAT,
-                sortType: TodoSortType.ASC,
+                sortType: SortType.ASC,
 
                 showDeleted: 'All'
             } as TodoQSDto
@@ -594,7 +594,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 20,
 
                 sort: TodoSort.CREATEDAT,
-                sortType: TodoSortType.ASC,
+                sortType: SortType.ASC,
 
                 showDeleted: 'All'
             } as TodoQSDto
@@ -616,7 +616,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 15,
 
                 sort: TodoSort.CREATEDAT,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
 
                 showDeleted: 'All'
             } as TodoQSDto
@@ -638,7 +638,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 15,
 
                 sort: TodoSort.PRIORITY,
-                sortType: TodoSortType.ASC,
+                sortType: SortType.ASC,
 
                 showDeleted: 'All'
             } as TodoQSDto
@@ -660,7 +660,7 @@ describe('TodoQuaryBuilder', () => {
                 limit: 10,
 
                 sort: TodoSort.DUEDATE,
-                sortType: TodoSortType.DESC,
+                sortType: SortType.DESC,
 
                 showDeleted: 'All'
             } as TodoQSDto

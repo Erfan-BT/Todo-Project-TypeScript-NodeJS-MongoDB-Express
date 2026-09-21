@@ -1,4 +1,5 @@
-import { UserSort, UserSortType } from "../types/user.enum.js"
+import { SortType } from "../types/sort.type.js"
+import { UserSort } from "../types/user.enum.js"
 import { escapeRegex } from "../utils/escape.regex.js"
 import { UserQSDto } from "../validations/auth.validation.js"
 
@@ -83,7 +84,7 @@ export class UserQuaryBuilder {
     }
 
     static buildOrder (qs : UserQSDto) {
-        const sortType = qs.sortType === UserSortType.ASC ? 1 : -1
+        const sortType = qs.sortType === SortType.ASC ? 1 : -1
         switch (qs.sort) {
             case UserSort.CREATEDAT:
                 return { createdAt : sortType, _id: sortType }

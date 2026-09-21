@@ -1,6 +1,7 @@
 import z from "zod";
-import { UserSort, UserSortType } from "../types/user.enum.js";
+import { UserSort } from "../types/user.enum.js";
 import { Types } from "mongoose";
+import { SortType } from "../types/sort.type.js";
 
 export const registerSchema = z.object({
     fullname : z.string().trim().min(4, 'At Least 4 Characters Are Required').max(50, 'Max Characters : 50'),
@@ -27,7 +28,7 @@ export const userQS = z.object({
     limit : z.coerce.number().int().positive().max(50).default(30),
 
     sort : z.enum(UserSort).default(UserSort.CREATEDAT),
-    sortType : z.enum(UserSortType).default(UserSortType.DESC),
+    sortType : z.enum(SortType).default(SortType.DESC),
 
     q : z.string().trim().max(50, 'Max Characters : 50').optional(),
 

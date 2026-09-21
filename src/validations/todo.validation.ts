@@ -1,13 +1,14 @@
 import z, { string } from "zod";
-import { TodoSort, TodoSortType, TodoStatus } from "../types/todo.enum.js";
+import { TodoSort, TodoStatus } from "../types/todo.enum.js";
 import { Types } from "mongoose";
+import { SortType } from "../types/sort.type.js";
 
 export const todoQS = z.object({
     page : z.coerce.number().int().positive().default(1),
     limit : z.coerce.number().int().positive().max(30, 'Max Limit : 30').default(15),
 
     sort : z.enum(TodoSort).default(TodoSort.PRIORITY),
-    sortType : z.enum(TodoSortType).default(TodoSortType.DESC),
+    sortType : z.enum(SortType).default(SortType.DESC),
 
     q : z.string().trim().max(50, 'Max Characters : 50').optional(),
 
