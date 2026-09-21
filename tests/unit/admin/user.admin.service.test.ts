@@ -32,7 +32,7 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
         getAllUsers: vi.fn(),
         getAdminUserById: vi.fn(),
         changeUser: vi.fn(),
-        changePassword: vi.fn(),
+        changeAdminPassword: vi.fn(),
         changeUserStatus: vi.fn(),
         deleteUser: vi.fn(),
         restoreUser: vi.fn()
@@ -638,7 +638,7 @@ describe('UserAdminService', () => {
             vi.mocked(argon2.hash)
                 .mockResolvedValue(hashedPassword as never)
 
-            vi.mocked(authRepository.changePassword)
+            vi.mocked(authRepository.changeAdminPassword)
                 .mockResolvedValue(true)
 
 
@@ -658,7 +658,7 @@ describe('UserAdminService', () => {
                 .toHaveBeenCalledWith(newPassword)
 
 
-            expect(authRepository.changePassword)
+            expect(authRepository.changeAdminPassword)
                 .toHaveBeenCalledWith(
                     userId,
                     hashedPassword,
@@ -708,7 +708,7 @@ describe('UserAdminService', () => {
             expect(argon2.hash)
                 .not.toHaveBeenCalled()
 
-            expect(authRepository.changePassword)
+            expect(authRepository.changeAdminPassword)
                 .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
@@ -739,7 +739,7 @@ describe('UserAdminService', () => {
             expect(argon2.hash)
                 .not.toHaveBeenCalled()
 
-            expect(authRepository.changePassword)
+            expect(authRepository.changeAdminPassword)
                 .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
@@ -762,7 +762,7 @@ describe('UserAdminService', () => {
             vi.mocked(argon2.hash)
                 .mockResolvedValue(hashedPassword as never)
 
-            vi.mocked(authRepository.changePassword)
+            vi.mocked(authRepository.changeAdminPassword)
                 .mockResolvedValue(false)
 
 
@@ -796,7 +796,7 @@ describe('UserAdminService', () => {
             vi.mocked(argon2.hash)
                 .mockResolvedValue('new-hashed-password' as never)
 
-            vi.mocked(authRepository.changePassword)
+            vi.mocked(authRepository.changeAdminPassword)
                 .mockResolvedValue(true)
 
             vi.mocked(auditRepository.createAudit)
