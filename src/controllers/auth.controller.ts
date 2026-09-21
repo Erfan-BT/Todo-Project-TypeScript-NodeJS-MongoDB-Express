@@ -97,6 +97,21 @@ class AuthController {
             next(error)
         }
     } 
+
+    async getUserAccount (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { userId } = req.user!
+            const data = await authService.getUserAccount(userId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'User Account Successfully Found',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    } 
 }
 
 export default new AuthController()

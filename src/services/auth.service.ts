@@ -1,11 +1,14 @@
 import argon2 from "argon2";
 import authRepository from "../repository/auth.repository.js";
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../utils/appError.js";
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from "../utils/appError.js";
 import { ChangePasswordDto, LoginDto, RegisterDto } from "../validations/auth.validation.js";
 import tokenService from "./token.service.js";
 import {  Types } from "mongoose";
 import sessionRepository from "../repository/session.repository.js";
 import { UAParser } from "ua-parser-js";
+import { IUser } from "../models/user.model.js";
+import todoRepository from "../repository/todo.repository.js";
+import { UserTodosState } from "../types/todo.type.js";
 
 class AuthService {
     async register (registerData : RegisterDto, userAgent : string)
@@ -161,6 +164,25 @@ class AuthService {
     : Promise<void> {
         // Delete Session(s)
         await sessionRepository.deleteSessions(userId)
+    }
+
+    async getUserAccount (userId : Types.ObjectId)
+    : Promise<{
+        user : IUser;
+        state : UserTodosState
+    }> {
+        // Get User
+        const user = await authRepository.getUserById(userId)
+        if (!user)
+            throw new UnauthorizedError()
+
+        // Get User Todos State
+        const state = await todoRepository.userTodosState(userId)
+
+        return {
+            user,
+            state
+        }
     }
 }
 

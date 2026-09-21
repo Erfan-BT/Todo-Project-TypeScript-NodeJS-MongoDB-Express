@@ -3,6 +3,7 @@ import { Todo } from "../models/index.js"
 import { ITodo } from "../models/todo.model.js"
 import { CreateTodoDto } from "../validations/todo.validation.js"
 import { TodoStatus } from "../types/todo.enum.js"
+import { UserTodosState } from "../types/todo.type.js"
 
 class TodoRepository {
     async getUserTodos (userId : Types.ObjectId, limit : number, skip : number, where : any, sort : any)
@@ -110,6 +111,55 @@ class TodoRepository {
         })
 
         return result.modifiedCount > 0
+    }
+
+    async userTodosState (userId : Types.ObjectId)
+    : Promise<UserTodosState> {
+        const now = new Date()
+
+        const startOfToday = new Date(now)
+        startOfToday.setHours(0, 0, 0, 0)
+
+        const startOfTomorrow = new Date(startOfToday)
+        startOfTomorrow.setDate(startOfTomorrow.getDate() + 1)
+
+        const [
+            active,
+            deleted,
+            pending,
+            completed,
+            canceled,
+            upcoming,
+            overdue,
+            today
+        ] = await Promise.all([
+            Todo.countDocuments({userId, deletedAt : null}),
+
+            Todo.countDocuments({userId, deletedAt : { $ne : null }}),
+
+            Todo.countDocuments({userId, status : TodoStatus.PENDING, deletedAt : null}),
+
+            Todo.countDocuments({userId, status : TodoStatus.COMPLETED, deletedAt : null}),
+
+            Todo.countDocuments({userId, status : TodoStatus.CANCELED, deletedAt : null}),
+
+            Todo.countDocuments({userId, dueDate : { $gte : now }, deletedAt : null}),
+
+            Todo.countDocuments({userId, dueDate : { $lt : now }, status : TodoStatus.PENDING, deletedAt : null}),
+
+            Todo.countDocuments({userId, createdAt : { $gte : startOfToday, $lt : startOfTomorrow }}),
+        ])
+
+        return {
+            active,
+            deleted,
+            pending,
+            completed,
+            canceled,
+            upcoming,
+            overdue,
+            today
+        }
     }
 
     // ----- Admin -----

@@ -12,5 +12,6 @@ router.post('/refresh', validate({ body : refreshTokenSchema }), authControllers
 router.patch('/change-password', authMiddleware, validate({ body : changePasswordSchema }), authControllers.changePassword)
 router.post('/logout', authMiddleware, authControllers.logout)
 router.post('/logout-all', authMiddleware, authControllers.logoutAll)
+router.get('/me', authMiddleware, authControllers.getUserAccount)
 
 export default router
