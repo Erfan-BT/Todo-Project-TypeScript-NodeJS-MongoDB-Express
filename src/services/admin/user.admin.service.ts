@@ -95,7 +95,7 @@ class UserAdminService {
         try {
             await session.withTransaction(async () => {
                 // Change User Password
-                if (!await authRepository.changePassword(userId, hashedNewPassword, session))
+                if (!await authRepository.changeAdminPassword(userId, hashedNewPassword, session))
                     throw new ConflictError('User Password Not Changed')
 
                 // Add Admin Audit

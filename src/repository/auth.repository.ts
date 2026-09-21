@@ -41,7 +41,7 @@ class AuthRepository {
         return await User.create(data)
     }
 
-    async changePassword (userId : Types.ObjectId, password : string, session : ClientSession)
+    async changePassword (userId : Types.ObjectId, password : string)
     : Promise<boolean> {
         const result = await User.updateOne({
             _id : userId
@@ -49,8 +49,6 @@ class AuthRepository {
             $set : {
                 password
             }
-        }, {
-            session
         })
         return result.modifiedCount === 1
     }
@@ -114,6 +112,20 @@ class AuthRepository {
             session
         })
 
+        return result.modifiedCount === 1
+    }
+
+    async changeAdminPassword (userId : Types.ObjectId, password : string, session : ClientSession)
+    : Promise<boolean> {
+        const result = await User.updateOne({
+            _id : userId
+        }, {
+            $set : {
+                password
+            }
+        }, {
+            session
+        })
         return result.modifiedCount === 1
     }
 
