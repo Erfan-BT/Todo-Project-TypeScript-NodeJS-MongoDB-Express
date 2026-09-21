@@ -1,8 +1,24 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { Response, NextFunction } from 'express'
+import {
+    beforeEach,
+    describe,
+    expect,
+    it,
+    vi
+} from 'vitest'
 
-import userAdminController from '../../../src/controllers/admin/user.admin.controller.js'
-import userAdminService from '../../../src/services/admin/user.admin.service.js'
+import type {
+    NextFunction,
+    Response
+} from 'express'
+
+import { Types } from 'mongoose'
+
+import userAdminController
+    from '../../../src/controllers/admin/user.admin.controller.js'
+
+import userAdminService
+    from '../../../src/services/admin/user.admin.service.js'
+
 
 vi.mock('../../../src/services/admin/user.admin.service.js', () => ({
     default: {
@@ -16,13 +32,18 @@ vi.mock('../../../src/services/admin/user.admin.service.js', () => ({
     }
 }))
 
+
 describe('UserAdminController', () => {
 
     let req: any
     let res: Response
     let next: NextFunction
 
+    const adminId = new Types.ObjectId()
+    const ipAddress = '127.0.0.1'
+
     beforeEach(() => {
+
         vi.clearAllMocks()
 
         req = {
@@ -30,7 +51,13 @@ describe('UserAdminController', () => {
                 params: {},
                 query: {},
                 body: {}
-            }
+            },
+
+            user: {
+                userId: adminId
+            },
+
+            ip: ipAddress
         }
 
         res = {
@@ -41,9 +68,11 @@ describe('UserAdminController', () => {
         next = vi.fn()
     })
 
+
     describe('getAllUsers', () => {
 
         it('should return all users successfully', async () => {
+
             const query = {
                 page: 1,
                 limit: 10,
@@ -95,13 +124,17 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('Database Error')
 
-            req.validated.query = {
+            const query = {
                 page: 1,
                 limit: 10
             }
+
+            req.validated.query = query
 
             vi.mocked(userAdminService.getAllUsers)
                 .mockRejectedValue(error)
@@ -130,6 +163,7 @@ describe('UserAdminController', () => {
     describe('getUser', () => {
 
         it('should return user successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
 
             const user = {
@@ -174,7 +208,9 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('User Not Found')
 
             const userId = '507f1f77bcf86cd799439011'
@@ -197,6 +233,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 
@@ -204,6 +246,7 @@ describe('UserAdminController', () => {
     describe('changeUser', () => {
 
         it('should change user successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
 
             const userData = {
@@ -223,7 +266,7 @@ describe('UserAdminController', () => {
             req.validated.body = userData
 
             vi.mocked(userAdminService.changeUser)
-                .mockResolvedValue(changedData)
+                .mockResolvedValue(changedData as any)
 
             await userAdminController.changeUser(
                 req,
@@ -237,7 +280,9 @@ describe('UserAdminController', () => {
             expect(userAdminService.changeUser)
                 .toHaveBeenCalledWith(
                     userId,
-                    userData
+                    userData,
+                    adminId,
+                    ipAddress
                 )
 
             expect(res.status)
@@ -254,18 +299,22 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('User Not Changed')
 
             const userId = '507f1f77bcf86cd799439011'
+
+            const userData = {
+                fullname: 'New Name'
+            }
 
             req.validated.params = {
                 userId
             }
 
-            req.validated.body = {
-                fullname: 'New Name'
-            }
+            req.validated.body = userData
 
             vi.mocked(userAdminService.changeUser)
                 .mockRejectedValue(error)
@@ -281,6 +330,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 
@@ -288,16 +343,19 @@ describe('UserAdminController', () => {
     describe('changeUserPassword', () => {
 
         it('should change user password successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
 
             const newPassword = 'NewPassword123!'
+            const reason = 'Password reset requested by administrator'
 
             req.validated.params = {
                 userId
             }
 
             req.validated.body = {
-                newPassword
+                newPassword,
+                reason
             }
 
             vi.mocked(userAdminService.changeUserPassword)
@@ -315,7 +373,10 @@ describe('UserAdminController', () => {
             expect(userAdminService.changeUserPassword)
                 .toHaveBeenCalledWith(
                     userId,
-                    newPassword
+                    newPassword,
+                    adminId,
+                    reason,
+                    ipAddress
                 )
 
             expect(res.status)
@@ -332,7 +393,9 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('Can Not Change Password')
 
             const userId = '507f1f77bcf86cd799439011'
@@ -342,7 +405,8 @@ describe('UserAdminController', () => {
             }
 
             req.validated.body = {
-                newPassword: 'NewPassword123!'
+                newPassword: 'NewPassword123!',
+                reason: 'Administrative password reset'
             }
 
             vi.mocked(userAdminService.changeUserPassword)
@@ -359,6 +423,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 
@@ -366,14 +436,23 @@ describe('UserAdminController', () => {
     describe('changeUserStatus', () => {
 
         it('should change user status successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
+
+            const reason = 'Administrative status change'
 
             req.validated.params = {
                 userId
             }
 
+            req.validated.body = {
+                reason
+            }
+
+            const newStatus = false
+
             vi.mocked(userAdminService.changeUserStatus)
-                .mockResolvedValue(false)
+                .mockResolvedValue(newStatus)
 
             await userAdminController.changeUserStatus(
                 req,
@@ -385,7 +464,12 @@ describe('UserAdminController', () => {
                 .toHaveBeenCalledOnce()
 
             expect(userAdminService.changeUserStatus)
-                .toHaveBeenCalledWith(userId)
+                .toHaveBeenCalledWith(
+                    userId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -394,20 +478,26 @@ describe('UserAdminController', () => {
                 .toHaveBeenCalledWith({
                     success: true,
                     msg: 'User Status Successfully Changed',
-                    data: false
+                    data: newStatus
                 })
 
             expect(next)
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('User Status Not Changed')
 
             const userId = '507f1f77bcf86cd799439011'
 
             req.validated.params = {
                 userId
+            }
+
+            req.validated.body = {
+                reason: 'Administrative status change'
             }
 
             vi.mocked(userAdminService.changeUserStatus)
@@ -424,6 +514,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 
@@ -431,10 +527,17 @@ describe('UserAdminController', () => {
     describe('deleteUser', () => {
 
         it('should delete user successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
+
+            const reason = 'User account deleted by administrator'
 
             req.validated.params = {
                 userId
+            }
+
+            req.validated.body = {
+                reason
             }
 
             vi.mocked(userAdminService.deleteUser)
@@ -450,7 +553,12 @@ describe('UserAdminController', () => {
                 .toHaveBeenCalledOnce()
 
             expect(userAdminService.deleteUser)
-                .toHaveBeenCalledWith(userId)
+                .toHaveBeenCalledWith(
+                    userId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -466,13 +574,19 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('User Not Deleted')
 
             const userId = '507f1f77bcf86cd799439011'
 
             req.validated.params = {
                 userId
+            }
+
+            req.validated.body = {
+                reason: 'Delete user'
             }
 
             vi.mocked(userAdminService.deleteUser)
@@ -489,6 +603,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 
@@ -496,7 +616,10 @@ describe('UserAdminController', () => {
     describe('restoreUser', () => {
 
         it('should restore user successfully', async () => {
+
             const userId = '507f1f77bcf86cd799439011'
+
+            const reason = 'User account restored by administrator'
 
             const restoredUser = {
                 _id: userId,
@@ -508,6 +631,10 @@ describe('UserAdminController', () => {
 
             req.validated.params = {
                 userId
+            }
+
+            req.validated.body = {
+                reason
             }
 
             vi.mocked(userAdminService.restoreUser)
@@ -523,7 +650,12 @@ describe('UserAdminController', () => {
                 .toHaveBeenCalledOnce()
 
             expect(userAdminService.restoreUser)
-                .toHaveBeenCalledWith(userId)
+                .toHaveBeenCalledWith(
+                    userId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -539,13 +671,19 @@ describe('UserAdminController', () => {
                 .not.toHaveBeenCalled()
         })
 
+
         it('should pass service error to next', async () => {
+
             const error = new Error('User Not Restored')
 
             const userId = '507f1f77bcf86cd799439011'
 
             req.validated.params = {
                 userId
+            }
+
+            req.validated.body = {
+                reason: 'Restore user'
             }
 
             vi.mocked(userAdminService.restoreUser)
@@ -562,6 +700,12 @@ describe('UserAdminController', () => {
 
             expect(next)
                 .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
         })
     })
 })
