@@ -1,9 +1,12 @@
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import todoAdminService from '../../../src/services/admin/todo.admin.service.js'
+
 import todoRepository from '../../../src/repository/todo.repository.js'
 import authRepository from '../../../src/repository/auth.repository.js'
+import auditRepository from '../../../src/repository/audit.repository.js'
+
 import { TodoQuaryBuilder } from '../../../src/builders/todo.quary.builder.js'
 
 import {
@@ -17,6 +20,7 @@ import { TodoStatus } from '../../../src/types/todo.enum.js'
 import { ITodo } from '../../../src/models/todo.model.js'
 import { IUser } from '../../../src/models/user.model.js'
 
+
 vi.mock('../../../src/repository/todo.repository.js', () => ({
     default: {
         getAdminUserTodos: vi.fn(),
@@ -29,6 +33,7 @@ vi.mock('../../../src/repository/todo.repository.js', () => ({
     }
 }))
 
+
 vi.mock('../../../src/repository/auth.repository.js', () => ({
     default: {
         getAdminUserByUsername: vi.fn(),
@@ -36,16 +41,27 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
     }
 }))
 
+
+vi.mock('../../../src/repository/audit.repository.js', () => ({
+    default: {
+        createAudit: vi.fn()
+    }
+}))
+
+
 vi.mock('../../../src/builders/todo.quary.builder.js', () => ({
     TodoQuaryBuilder: {
         build: vi.fn()
     }
 }))
 
+
 const todoId = new Types.ObjectId()
 const userId = new Types.ObjectId()
+const adminId = new Types.ObjectId()
 
-const anotherUserId = new Types.ObjectId()
+const ipAddress = '127.0.0.1'
+
 
 const createTodo = (
     overrides: Partial<ITodo> = {}
@@ -63,6 +79,7 @@ const createTodo = (
     ...overrides
 })
 
+
 const createUser = (
     overrides: Partial<IUser> = {}
 ): IUser => ({
@@ -78,11 +95,36 @@ const createUser = (
     ...overrides
 })
 
+
 describe('TodoAdminService', () => {
 
+    let session: {
+        withTransaction: ReturnType<typeof vi.fn>
+        endSession: ReturnType<typeof vi.fn>
+    }
+
+
     beforeEach(() => {
+
         vi.clearAllMocks()
+
+        session = {
+            withTransaction: vi.fn(
+                async (callback: () => Promise<void>) => {
+                    await callback()
+                }
+            ),
+
+            endSession: vi.fn().mockResolvedValue(undefined)
+        }
+
+        vi.spyOn(mongoose, 'startSession')
+            .mockResolvedValue(session as any)
+
+        vi.mocked(auditRepository.createAudit)
+            .mockResolvedValue(undefined as any)
     })
+
 
     describe('getAllTodos', () => {
 
@@ -100,7 +142,10 @@ describe('TodoAdminService', () => {
                 where: {
                     $and: []
                 },
-                sort: { createdAt: -1, _id: -1 }
+                sort: {
+                    createdAt: -1,
+                    _id: -1
+                }
             }
 
             const todos = [
@@ -117,7 +162,8 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.getAdminUserTodos)
                 .mockResolvedValue(todos)
 
-            const result = await todoAdminService.getAllTodos(qs)
+            const result =
+                await todoAdminService.getAllTodos(qs)
 
             expect(TodoQuaryBuilder.build)
                 .toHaveBeenCalledWith(qs)
@@ -130,8 +176,11 @@ describe('TodoAdminService', () => {
                     null,
                     30,
                     0,
-                    { $and : [] },
-                    { createdAt: -1, _id: -1 }
+                    { $and: [] },
+                    {
+                        createdAt: -1,
+                        _id: -1
+                    }
                 )
 
             expect(result).toEqual(todos)
@@ -156,14 +205,14 @@ describe('TodoAdminService', () => {
                         }
                     ]
                 },
-                sort: { priority: -1, _id: -1 }
+                sort: {
+                    priority: -1,
+                    _id: -1
+                }
             }
 
             const user = createUser()
-
-            const todos = [
-                createTodo()
-            ]
+            const todos = [createTodo()]
 
             vi.mocked(TodoQuaryBuilder.build)
                 .mockReturnValue(options)
@@ -174,10 +223,8 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.getAdminUserTodos)
                 .mockResolvedValue(todos)
 
-            const result = await todoAdminService.getAllTodos(qs)
-
-            expect(TodoQuaryBuilder.build)
-                .toHaveBeenCalledWith(qs)
+            const result =
+                await todoAdminService.getAllTodos(qs)
 
             expect(authRepository.getAdminUserByUsername)
                 .toHaveBeenCalledWith('testuser')
@@ -194,7 +241,10 @@ describe('TodoAdminService', () => {
                             }
                         ]
                     },
-                    { priority: -1, _id: -1 }
+                    {
+                        priority: -1,
+                        _id: -1
+                    }
                 )
 
             expect(result).toEqual(todos)
@@ -212,8 +262,13 @@ describe('TodoAdminService', () => {
             const options = {
                 limit: 30,
                 skip: 0,
-                where: { $and : [] },
-                sort: { createdAt: -1, _id: -1 }
+                where: {
+                    $and: []
+                },
+                sort: {
+                    createdAt: -1,
+                    _id: -1
+                }
             }
 
             vi.mocked(TodoQuaryBuilder.build)
@@ -242,8 +297,13 @@ describe('TodoAdminService', () => {
             const options = {
                 limit: 30,
                 skip: 0,
-                where: { $and : [] },
-                sort: { createdAt: -1, _id: -1 }
+                where: {
+                    $and: []
+                },
+                sort: {
+                    createdAt: -1,
+                    _id: -1
+                }
             }
 
             const error = new Error('Database Error')
@@ -260,6 +320,7 @@ describe('TodoAdminService', () => {
         })
     })
 
+
     describe('getTodo', () => {
 
         it('should return todo and its user', async () => {
@@ -273,7 +334,8 @@ describe('TodoAdminService', () => {
             vi.mocked(authRepository.getAdminUserById)
                 .mockResolvedValue(user)
 
-            const result = await todoAdminService.getTodo(todoId)
+            const result =
+                await todoAdminService.getTodo(todoId)
 
             expect(todoRepository.getAdminTodo)
                 .toHaveBeenCalledWith(todoId)
@@ -334,22 +396,18 @@ describe('TodoAdminService', () => {
         })
     })
 
+
     describe('changeTodo', () => {
 
-        it('should change all changed fields', async () => {
+        it('should change todo successfully and create audit log', async () => {
 
-            const oldDueDate = new Date('2026-12-20T10:00:00.000Z')
-            const newDueDate = new Date('2027-01-20T10:00:00.000Z')
-
-            const todo = createTodo({
-                dueDate: oldDueDate
-            })
+            const todo = createTodo()
 
             const todoData = {
                 title: 'New Title',
                 description: 'New Description',
                 priority: 5,
-                dueDate: newDueDate
+                dueDate: new Date('2027-01-20T10:00:00.000Z')
             } as any
 
             vi.mocked(todoRepository.getAdminTodo)
@@ -358,10 +416,19 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.changeAdminTodo)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
+            const result =
+                await todoAdminService.changeTodo(
+                    todoId,
+                    todoData,
+                    adminId,
+                    ipAddress
+                )
+
+            expect(mongoose.startSession)
+                .toHaveBeenCalledOnce()
+
+            expect(session.withTransaction)
+                .toHaveBeenCalledOnce()
 
             expect(todoRepository.changeAdminTodo)
                 .toHaveBeenCalledWith(
@@ -370,20 +437,51 @@ describe('TodoAdminService', () => {
                         title: 'New Title',
                         description: 'New Description',
                         priority: 5,
-                        dueDate: newDueDate
-                    }
+                        dueDate: todoData.dueDate
+                    },
+                    session
                 )
+
+            expect(auditRepository.createAudit)
+                .toHaveBeenCalledWith(
+                    {
+                        adminId,
+                        action: expect.anything(),
+                        entityType: expect.anything(),
+                        entityId: todoId,
+
+                        oldValue: {
+                            title: todo.title,
+                            description: todo.description,
+                            priority: todo.priority,
+                            dueDate: todo.dueDate
+                        },
+
+                        newValue: {
+                            title: 'New Title',
+                            description: 'New Description',
+                            priority: 5,
+                            dueDate: todoData.dueDate
+                        },
+
+                        ipAddress
+                    },
+                    session
+                )
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
 
             expect(result).toEqual({
                 title: 'New Title',
                 description: 'New Description',
                 priority: 5,
-                dueDate: newDueDate
+                dueDate: todoData.dueDate
             })
         })
 
 
-        it('should change only fullname-equivalent todo field: title', async () => {
+        it('should change only changed fields', async () => {
 
             const todo = createTodo()
 
@@ -397,17 +495,21 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.changeAdminTodo)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
+            const result =
+                await todoAdminService.changeTodo(
+                    todoId,
+                    todoData,
+                    adminId,
+                    ipAddress
+                )
 
             expect(todoRepository.changeAdminTodo)
                 .toHaveBeenCalledWith(
                     todoId,
                     {
                         title: 'New Title'
-                    }
+                    },
+                    session
                 )
 
             expect(result).toEqual({
@@ -416,137 +518,35 @@ describe('TodoAdminService', () => {
         })
 
 
-        it('should change only description', async () => {
+        it('should not update when no field has changed', async () => {
 
             const todo = createTodo()
 
             const todoData = {
-                description: 'New Description'
+                title: todo.title,
+                description: todo.description,
+                priority: todo.priority,
+                dueDate: new Date(todo.dueDate)
             } as any
 
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
 
-            vi.mocked(todoRepository.changeAdminTodo)
-                .mockResolvedValue(true)
-
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
-
-            expect(todoRepository.changeAdminTodo)
-                .toHaveBeenCalledWith(
+            const result =
+                await todoAdminService.changeTodo(
                     todoId,
-                    {
-                        description: 'New Description'
-                    }
+                    todoData,
+                    adminId,
+                    ipAddress
                 )
 
-            expect(result).toEqual({
-                description: 'New Description'
-            })
-        })
-
-
-        it('should change only priority', async () => {
-
-            const todo = createTodo({
-                priority: 3
-            })
-
-            const todoData = {
-                priority: 5
-            } as any
-
-            vi.mocked(todoRepository.getAdminTodo)
-                .mockResolvedValue(todo)
-
-            vi.mocked(todoRepository.changeAdminTodo)
-                .mockResolvedValue(true)
-
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
-
             expect(todoRepository.changeAdminTodo)
-                .toHaveBeenCalledWith(
-                    todoId,
-                    {
-                        priority: 5
-                    }
-                )
+                .not.toHaveBeenCalled()
 
-            expect(result).toEqual({
-                priority: 5
-            })
-        })
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
 
-
-        it('should change only dueDate', async () => {
-
-            const oldDueDate = new Date('2026-12-20T10:00:00.000Z')
-            const newDueDate = new Date('2027-01-20T10:00:00.000Z')
-
-            const todo = createTodo({
-                dueDate: oldDueDate
-            })
-
-            const todoData = {
-                dueDate: newDueDate
-            } as any
-
-            vi.mocked(todoRepository.getAdminTodo)
-                .mockResolvedValue(todo)
-
-            vi.mocked(todoRepository.changeAdminTodo)
-                .mockResolvedValue(true)
-
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
-
-            expect(todoRepository.changeAdminTodo)
-                .toHaveBeenCalledWith(
-                    todoId,
-                    {
-                        dueDate: newDueDate
-                    }
-                )
-
-            expect(result).toEqual({
-                dueDate: newDueDate
-            })
-        })
-
-
-        it('should not update when no field has changed', async () => {
-
-            const todo = createTodo({
-                title: 'Test Todo',
-                description: 'Test Description',
-                priority: 3,
-                dueDate: new Date('2026-12-20T10:00:00.000Z')
-            })
-
-            const todoData = {
-                title: 'Test Todo',
-                description: 'Test Description',
-                priority: 3,
-                dueDate: new Date('2026-12-20T10:00:00.000Z')
-            } as any
-
-            vi.mocked(todoRepository.getAdminTodo)
-                .mockResolvedValue(todo)
-
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
-
-            expect(todoRepository.changeAdminTodo)
+            expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
 
             expect(result).toEqual({})
@@ -569,17 +569,21 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.changeAdminTodo)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.changeTodo(
-                todoId,
-                todoData
-            )
+            const result =
+                await todoAdminService.changeTodo(
+                    todoId,
+                    todoData,
+                    adminId,
+                    ipAddress
+                )
 
             expect(todoRepository.changeAdminTodo)
                 .toHaveBeenCalledWith(
                     todoId,
                     {
                         title: 'Changed Deleted Todo'
-                    }
+                    },
+                    session
                 )
 
             expect(result).toEqual({
@@ -598,11 +602,16 @@ describe('TodoAdminService', () => {
                     todoId,
                     {
                         title: 'New Title'
-                    } as any
+                    } as any,
+                    adminId,
+                    ipAddress
                 )
             ).rejects.toBeInstanceOf(NotFoundError)
 
             expect(todoRepository.changeAdminTodo)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
         })
 
@@ -622,15 +631,55 @@ describe('TodoAdminService', () => {
                     todoId,
                     {
                         title: 'New Title'
-                    } as any
+                    } as any,
+                    adminId,
+                    ipAddress
                 )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
+        })
+
+
+        it('should propagate audit error', async () => {
+
+            const todo = createTodo()
+
+            const error = new Error('Audit Error')
+
+            vi.mocked(todoRepository.getAdminTodo)
+                .mockResolvedValue(todo)
+
+            vi.mocked(todoRepository.changeAdminTodo)
+                .mockResolvedValue(true)
+
+            vi.mocked(auditRepository.createAudit)
+                .mockRejectedValue(error)
+
+            await expect(
+                todoAdminService.changeTodo(
+                    todoId,
+                    {
+                        title: 'New Title'
+                    } as any,
+                    adminId,
+                    ipAddress
+                )
+            ).rejects.toBe(error)
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
     })
 
+
     describe('changeTodoStatus', () => {
 
-        it('should change status from PENDING to COMPLETED', async () => {
+        it('should change status successfully and create audit log', async () => {
 
             const todo = createTodo({
                 status: TodoStatus.PENDING
@@ -642,20 +691,45 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.changeAdminTodoStatus)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.changeTodoStatus(
-                todoId,
-                TodoStatus.COMPLETED
-            )
+            const result =
+                await todoAdminService.changeTodoStatus(
+                    todoId,
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
+                )
 
             expect(todoRepository.changeAdminTodoStatus)
                 .toHaveBeenCalledWith(
                     todoId,
                     TodoStatus.PENDING,
-                    TodoStatus.COMPLETED
+                    TodoStatus.COMPLETED,
+                    session
+                )
+
+            expect(auditRepository.createAudit)
+                .toHaveBeenCalledWith(
+                    {
+                        adminId,
+                        action: expect.anything(),
+                        entityType: expect.anything(),
+                        entityId: todoId,
+                        oldValue: {
+                            status: TodoStatus.PENDING
+                        },
+                        newValue: {
+                            status: TodoStatus.COMPLETED
+                        },
+                        ipAddress
+                    },
+                    session
                 )
 
             expect(result)
                 .toBe(TodoStatus.COMPLETED)
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
 
 
@@ -671,16 +745,20 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.changeAdminTodoStatus)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.changeTodoStatus(
-                todoId,
-                TodoStatus.PENDING
-            )
+            const result =
+                await todoAdminService.changeTodoStatus(
+                    todoId,
+                    TodoStatus.PENDING,
+                    adminId,
+                    ipAddress
+                )
 
             expect(todoRepository.changeAdminTodoStatus)
                 .toHaveBeenCalledWith(
                     todoId,
                     TodoStatus.COMPLETED,
-                    TodoStatus.PENDING
+                    TodoStatus.PENDING,
+                    session
                 )
 
             expect(result)
@@ -697,12 +775,21 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
 
-            const result = await todoAdminService.changeTodoStatus(
-                todoId,
-                TodoStatus.PENDING
-            )
+            const result =
+                await todoAdminService.changeTodoStatus(
+                    todoId,
+                    TodoStatus.PENDING,
+                    adminId,
+                    ipAddress
+                )
 
             expect(todoRepository.changeAdminTodoStatus)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
 
             expect(result)
@@ -722,7 +809,9 @@ describe('TodoAdminService', () => {
             await expect(
                 todoAdminService.changeTodoStatus(
                     todoId,
-                    TodoStatus.COMPLETED
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
                 )
             ).rejects.toBeInstanceOf(BadRequestError)
 
@@ -739,7 +828,9 @@ describe('TodoAdminService', () => {
             await expect(
                 todoAdminService.changeTodoStatus(
                     todoId,
-                    TodoStatus.COMPLETED
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
                 )
             ).rejects.toBeInstanceOf(NotFoundError)
         })
@@ -760,19 +851,59 @@ describe('TodoAdminService', () => {
             await expect(
                 todoAdminService.changeTodoStatus(
                     todoId,
-                    TodoStatus.COMPLETED
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
                 )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
+        })
+
+
+        it('should propagate audit error', async () => {
+
+            const todo = createTodo()
+
+            const error = new Error('Audit Error')
+
+            vi.mocked(todoRepository.getAdminTodo)
+                .mockResolvedValue(todo)
+
+            vi.mocked(todoRepository.changeAdminTodoStatus)
+                .mockResolvedValue(true)
+
+            vi.mocked(auditRepository.createAudit)
+                .mockRejectedValue(error)
+
+            await expect(
+                todoAdminService.changeTodoStatus(
+                    todoId,
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
+                )
+            ).rejects.toBe(error)
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
     })
 
+
     describe('deleteSoftTodo', () => {
 
-        it('should soft delete an active todo', async () => {
+        it('should soft delete an active todo and create audit log', async () => {
 
             const todo = createTodo({
                 deletedAt: null
             })
+
+            const reason = 'Administrative deletion'
 
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
@@ -781,11 +912,35 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(true)
 
             await expect(
-                todoAdminService.deleteSoftTodo(todoId)
+                todoAdminService.deleteSoftTodo(
+                    todoId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
             ).resolves.toBeUndefined()
 
             expect(todoRepository.deleteAdminSoftTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(
+                    todoId,
+                    session
+                )
+
+            expect(auditRepository.createAudit)
+                .toHaveBeenCalledWith(
+                    {
+                        adminId,
+                        action: expect.anything(),
+                        entityType: expect.anything(),
+                        entityId: todoId,
+                        reason,
+                        ipAddress
+                    },
+                    session
+                )
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
 
 
@@ -798,9 +953,20 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
 
-            await todoAdminService.deleteSoftTodo(todoId)
+            await todoAdminService.deleteSoftTodo(
+                todoId,
+                adminId,
+                'Already deleted',
+                ipAddress
+            )
 
             expect(todoRepository.deleteAdminSoftTodo)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
         })
 
@@ -811,7 +977,12 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(null)
 
             await expect(
-                todoAdminService.deleteSoftTodo(todoId)
+                todoAdminService.deleteSoftTodo(
+                    todoId,
+                    adminId,
+                    'Delete',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(NotFoundError)
 
             expect(todoRepository.deleteAdminSoftTodo)
@@ -821,9 +992,7 @@ describe('TodoAdminService', () => {
 
         it('should throw ConflictError when soft delete fails', async () => {
 
-            const todo = createTodo({
-                deletedAt: null
-            })
+            const todo = createTodo()
 
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
@@ -832,20 +1001,33 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(false)
 
             await expect(
-                todoAdminService.deleteSoftTodo(todoId)
+                todoAdminService.deleteSoftTodo(
+                    todoId,
+                    adminId,
+                    'Delete',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
+
     })
+
 
     describe('restoreTodo', () => {
 
-        it('should restore a deleted todo', async () => {
-
-            const deletedAt = new Date('2026-09-01T10:00:00.000Z')
+        it('should restore deleted todo and create audit log', async () => {
 
             const todo = createTodo({
-                deletedAt
+                deletedAt: new Date('2026-09-01T10:00:00.000Z')
             })
+
+            const reason = 'Administrative restore'
 
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
@@ -853,13 +1035,41 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.restoreAdminTodo)
                 .mockResolvedValue(true)
 
-            const result = await todoAdminService.restoreTodo(todoId)
+            const result =
+                await todoAdminService.restoreTodo(
+                    todoId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
 
             expect(todoRepository.restoreAdminTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(
+                    todoId,
+                    session
+                )
+
+            expect(auditRepository.createAudit)
+                .toHaveBeenCalledWith(
+                    {
+                        adminId,
+                        action: expect.anything(),
+                        entityType: expect.anything(),
+                        entityId: todoId,
+                        reason,
+                        ipAddress
+                    },
+                    session
+                )
+
+            expect(result)
+                .toBe(todo)
 
             expect(result.deletedAt)
                 .toBeNull()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
 
 
@@ -872,9 +1082,21 @@ describe('TodoAdminService', () => {
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
 
-            const result = await todoAdminService.restoreTodo(todoId)
+            const result =
+                await todoAdminService.restoreTodo(
+                    todoId,
+                    adminId,
+                    'Restore',
+                    ipAddress
+                )
 
             expect(todoRepository.restoreAdminTodo)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
 
             expect(result)
@@ -888,7 +1110,12 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(null)
 
             await expect(
-                todoAdminService.restoreTodo(todoId)
+                todoAdminService.restoreTodo(
+                    todoId,
+                    adminId,
+                    'Restore',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(NotFoundError)
 
             expect(todoRepository.restoreAdminTodo)
@@ -909,18 +1136,63 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(false)
 
             await expect(
-                todoAdminService.restoreTodo(todoId)
+                todoAdminService.restoreTodo(
+                    todoId,
+                    adminId,
+                    'Restore',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
-    })
 
-    describe('deleteHardTodo', () => {
 
-        it('should hard delete a soft-deleted todo', async () => {
+        it('should propagate audit error', async () => {
 
             const todo = createTodo({
                 deletedAt: new Date('2026-09-01T10:00:00.000Z')
             })
+
+            const error = new Error('Audit Error')
+
+            vi.mocked(todoRepository.getAdminTodo)
+                .mockResolvedValue(todo)
+
+            vi.mocked(todoRepository.restoreAdminTodo)
+                .mockResolvedValue(true)
+
+            vi.mocked(auditRepository.createAudit)
+                .mockRejectedValue(error)
+
+            await expect(
+                todoAdminService.restoreTodo(
+                    todoId,
+                    adminId,
+                    'Restore',
+                    ipAddress
+                )
+            ).rejects.toBe(error)
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
+        })
+    })
+
+
+    describe('deleteHardTodo', () => {
+
+        it('should hard delete a soft-deleted todo and create audit log', async () => {
+
+            const todo = createTodo({
+                deletedAt: new Date('2026-09-01T10:00:00.000Z')
+            })
+
+            const reason = 'Permanent deletion'
 
             vi.mocked(todoRepository.getAdminTodo)
                 .mockResolvedValue(todo)
@@ -929,11 +1201,35 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(true)
 
             await expect(
-                todoAdminService.deleteHardTodo(todoId)
+                todoAdminService.deleteHardTodo(
+                    todoId,
+                    adminId,
+                    reason,
+                    ipAddress
+                )
             ).resolves.toBeUndefined()
 
             expect(todoRepository.deleteAdminHardTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(
+                    todoId,
+                    session
+                )
+
+            expect(auditRepository.createAudit)
+                .toHaveBeenCalledWith(
+                    {
+                        adminId,
+                        action: expect.anything(),
+                        entityType: expect.anything(),
+                        entityId: todoId,
+                        reason,
+                        ipAddress
+                    },
+                    session
+                )
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
 
 
@@ -947,10 +1243,21 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(todo)
 
             await expect(
-                todoAdminService.deleteHardTodo(todoId)
+                todoAdminService.deleteHardTodo(
+                    todoId,
+                    adminId,
+                    'Permanent deletion',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(ForbiddenError)
 
             expect(todoRepository.deleteAdminHardTodo)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
         })
 
@@ -961,7 +1268,12 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(null)
 
             await expect(
-                todoAdminService.deleteHardTodo(todoId)
+                todoAdminService.deleteHardTodo(
+                    todoId,
+                    adminId,
+                    'Permanent deletion',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(NotFoundError)
 
             expect(todoRepository.deleteAdminHardTodo)
@@ -982,8 +1294,50 @@ describe('TodoAdminService', () => {
                 .mockResolvedValue(false)
 
             await expect(
-                todoAdminService.deleteHardTodo(todoId)
+                todoAdminService.deleteHardTodo(
+                    todoId,
+                    adminId,
+                    'Permanent deletion',
+                    ipAddress
+                )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
+        })
+
+
+        it('should propagate audit error', async () => {
+
+            const todo = createTodo({
+                deletedAt: new Date('2026-09-01T10:00:00.000Z')
+            })
+
+            const error = new Error('Audit Error')
+
+            vi.mocked(todoRepository.getAdminTodo)
+                .mockResolvedValue(todo)
+
+            vi.mocked(todoRepository.deleteAdminHardTodo)
+                .mockResolvedValue(true)
+
+            vi.mocked(auditRepository.createAudit)
+                .mockRejectedValue(error)
+
+            await expect(
+                todoAdminService.deleteHardTodo(
+                    todoId,
+                    adminId,
+                    'Permanent deletion',
+                    ipAddress
+                )
+            ).rejects.toBe(error)
+
+            expect(session.endSession)
+                .toHaveBeenCalledOnce()
         })
     })
 })

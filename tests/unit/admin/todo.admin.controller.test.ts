@@ -25,6 +25,10 @@ describe('TodoAdminController', () => {
     const mockNext = () => vi.fn() as unknown as NextFunction
 
     const todoId = new Types.ObjectId()
+    const adminId = new Types.ObjectId()
+
+    const reason = 'Reason'
+    const ipAddress ='-0-'
 
     const todo = {
         _id: todoId,
@@ -189,7 +193,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -207,7 +217,7 @@ describe('TodoAdminController', () => {
             await todoAdminController.restoreTodo(req, res, next)
 
             expect(todoAdminService.restoreTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(todoId, adminId, reason, ipAddress)
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -230,7 +240,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -249,11 +265,6 @@ describe('TodoAdminController', () => {
         })
     })
 
-
-    // ==================================================
-    // changeTodo
-    // ==================================================
-
     describe('changeTodo', () => {
 
         it('should change todo successfully', async () => {
@@ -267,6 +278,9 @@ describe('TodoAdminController', () => {
                         title: 'Updated Todo',
                         priority: 5
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -286,7 +300,9 @@ describe('TodoAdminController', () => {
             expect(todoAdminService.changeTodo)
                 .toHaveBeenCalledWith(
                     todoId,
-                    req.validated.body
+                    req.validated.body,
+                    adminId,
+                    ipAddress
                 )
 
             expect(res.status)
@@ -314,6 +330,9 @@ describe('TodoAdminController', () => {
                     body: {
                         title: 'Updated Todo'
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -332,11 +351,6 @@ describe('TodoAdminController', () => {
         })
     })
 
-
-    // ==================================================
-    // changeTodoStatus
-    // ==================================================
-
     describe('changeTodoStatus', () => {
 
         it('should change todo status successfully', async () => {
@@ -349,6 +363,9 @@ describe('TodoAdminController', () => {
                     body: {
                         status: TodoStatus.COMPLETED
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -363,7 +380,9 @@ describe('TodoAdminController', () => {
             expect(todoAdminService.changeTodoStatus)
                 .toHaveBeenCalledWith(
                     todoId,
-                    TodoStatus.COMPLETED
+                    TodoStatus.COMPLETED,
+                    adminId,
+                    ipAddress
                 )
 
             expect(res.status)
@@ -391,6 +410,9 @@ describe('TodoAdminController', () => {
                     body: {
                         status: TodoStatus.COMPLETED
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -409,11 +431,6 @@ describe('TodoAdminController', () => {
         })
     })
 
-
-    // ==================================================
-    // deleteSoftTodo
-    // ==================================================
-
     describe('deleteSoftTodo', () => {
 
         it('should soft delete todo successfully', async () => {
@@ -422,7 +439,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -435,7 +458,7 @@ describe('TodoAdminController', () => {
             await todoAdminController.deleteSoftTodo(req, res, next)
 
             expect(todoAdminService.deleteSoftTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(todoId, adminId, reason, ipAddress)
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -458,7 +481,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -477,11 +506,6 @@ describe('TodoAdminController', () => {
         })
     })
 
-
-    // ==================================================
-    // deleteHardTodo
-    // ==================================================
-
     describe('deleteHardTodo', () => {
 
         it('should hard delete todo successfully', async () => {
@@ -490,7 +514,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
@@ -503,7 +533,7 @@ describe('TodoAdminController', () => {
             await todoAdminController.deleteHardTodo(req, res, next)
 
             expect(todoAdminService.deleteHardTodo)
-                .toHaveBeenCalledWith(todoId)
+                .toHaveBeenCalledWith(todoId, adminId, reason, ipAddress)
 
             expect(res.status)
                 .toHaveBeenCalledWith(200)
@@ -526,7 +556,13 @@ describe('TodoAdminController', () => {
                 validated: {
                     params: {
                         todoId
+                    },
+                    body : {
+                        reason
                     }
+                },
+                user : {
+                    userId : adminId
                 }
             } as any
 
