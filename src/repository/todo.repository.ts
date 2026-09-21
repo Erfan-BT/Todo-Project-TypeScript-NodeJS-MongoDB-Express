@@ -1,4 +1,4 @@
-import { Types } from "mongoose"
+import { ClientSession, Types } from "mongoose"
 import { Todo } from "../models/index.js"
 import { ITodo } from "../models/todo.model.js"
 import { CreateTodoDto } from "../validations/todo.validation.js"
@@ -134,7 +134,7 @@ class TodoRepository {
         .lean()
     }
 
-    async changeAdminTodo (todoId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>>)
+    async changeAdminTodo (todoId : Types.ObjectId, data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>>, session : ClientSession)
     : Promise<boolean> {
         const result = await Todo.updateOne({
             _id : todoId,
@@ -142,12 +142,14 @@ class TodoRepository {
             $set : {
                 ...data
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async changeAdminTodoStatus (todoId : Types.ObjectId, currentStatus : TodoStatus, newStatus : TodoStatus)
+    async changeAdminTodoStatus (todoId : Types.ObjectId, currentStatus : TodoStatus, newStatus : TodoStatus, session : ClientSession)
     : Promise<boolean> {
         const result = await Todo.updateOne({
             _id : todoId,
@@ -157,12 +159,14 @@ class TodoRepository {
             $set : {
                 status : newStatus
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async deleteAdminSoftTodo (todoId : Types.ObjectId)
+    async deleteAdminSoftTodo (todoId : Types.ObjectId, session : ClientSession)
     : Promise<boolean> {
         const result = await Todo.updateOne({
             _id : todoId,
@@ -171,22 +175,26 @@ class TodoRepository {
             $set : {
                 deletedAt : new Date(),
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1
     }
 
-    async deleteAdminHardTodo (todoId : Types.ObjectId)
+    async deleteAdminHardTodo (todoId : Types.ObjectId, session : ClientSession)
     : Promise<boolean> {
         const result = await Todo.deleteOne({
             _id : todoId,
             deletedAt : { $ne : null }
+        }, {
+            session
         })
 
         return result.deletedCount === 1
     }
     
-    async restoreAdminTodo (todoId : Types.ObjectId)
+    async restoreAdminTodo (todoId : Types.ObjectId, session : ClientSession)
     : Promise<boolean> {
         const result = await Todo.updateOne({
             _id : todoId,
@@ -197,6 +205,8 @@ class TodoRepository {
             $set : {
                 deletedAt : null
             }
+        }, {
+            session
         })
 
         return result.modifiedCount === 1

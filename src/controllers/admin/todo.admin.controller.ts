@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
 import { ChangeTodoDto, ChangeTodoStatusDto, TodoIdDto, TodoQSDto } from "../../validations/todo.validation.js";
 import todoAdminService from "../../services/admin/todo.admin.service.js";
+import { ReasonDto } from "../../validations/audit.validation.js";
 
 class TodoAdminController {
     async getAllTodos (req : AuthRequest, res : Response, next : NextFunction) {
@@ -37,7 +38,9 @@ class TodoAdminController {
     async restoreTodo (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { todoId } = req.validated.params as TodoIdDto
-            const data = await todoAdminService.restoreTodo(todoId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            const data = await todoAdminService.restoreTodo(todoId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -53,7 +56,8 @@ class TodoAdminController {
         try {
             const { todoId } = req.validated.params as TodoIdDto
             const todoData = req.validated.body as ChangeTodoDto
-            const data = await todoAdminService.changeTodo(todoId, todoData)
+            const adminId = req.user!.userId
+            const data = await todoAdminService.changeTodo(todoId, todoData, adminId, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -69,7 +73,8 @@ class TodoAdminController {
         try {
             const { todoId } = req.validated.params as TodoIdDto
             const { status } = req.validated.body as ChangeTodoStatusDto
-            const data = await todoAdminService.changeTodoStatus(todoId, status)
+            const adminId = req.user!.userId
+            const data = await todoAdminService.changeTodoStatus(todoId, status, adminId, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -84,7 +89,9 @@ class TodoAdminController {
     async deleteSoftTodo (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { todoId } = req.validated.params as TodoIdDto
-            await todoAdminService.deleteSoftTodo(todoId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            await todoAdminService.deleteSoftTodo(todoId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,
@@ -99,7 +106,9 @@ class TodoAdminController {
     async deleteHardTodo (req : AuthRequest, res : Response, next : NextFunction) {
         try {
             const { todoId } = req.validated.params as TodoIdDto
-            await todoAdminService.deleteHardTodo(todoId)
+            const { reason } = req.validated.body as ReasonDto
+            const adminId = req.user!.userId
+            await todoAdminService.deleteHardTodo(todoId, adminId, reason, req.ip ?? '-0-')
 
             res.status(200).json({
                 success : true,

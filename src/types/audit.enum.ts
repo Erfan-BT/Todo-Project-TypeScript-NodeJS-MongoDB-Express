@@ -2,6 +2,7 @@ export enum AuditAction {
     CREATE = 'CREATE',
     CHANGE = 'CHANGE',
     DELETE = 'DELETE',
+    DELETE_HARD = 'DELETE_HARD',
     RESTORE = 'RESTORE',
 
     ACTIVE = 'ACTIVE',

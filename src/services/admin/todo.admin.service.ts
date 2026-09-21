@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { TodoQuaryBuilder } from "../../builders/todo.quary.builder.js";
 import { ITodo } from "../../models/todo.model.js";
 import todoRepository from "../../repository/todo.repository.js";
@@ -7,6 +7,8 @@ import authRepository from "../../repository/auth.repository.js";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../../utils/appError.js";
 import { IUser } from "../../models/user.model.js";
 import { TodoStatus } from "../../types/todo.enum.js";
+import auditRepository from "../../repository/audit.repository.js";
+import { AuditAction, AuditEntityType } from "../../types/audit.enum.js";
 
 class TodoAdminService {
     async getAllTodos (qs : TodoQSDto)
@@ -48,7 +50,7 @@ class TodoAdminService {
         }
     }
 
-    async changeTodo (todoId : Types.ObjectId, todoData : ChangeTodoDto)
+    async changeTodo (todoId : Types.ObjectId, todoData : ChangeTodoDto, adminId : Types.ObjectId, ipAddress : string)
     : Promise<ChangeTodoDto> {
         // Get Todo
         const todo = await todoRepository.getAdminTodo(todoId)
@@ -73,14 +75,38 @@ class TodoAdminService {
         if (!Object.keys(data).length)
             return data
 
-        // Change Todo
-        if (!await todoRepository.changeAdminTodo(todoId, data))
-            throw new ConflictError('Todo Not Changed')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Change Todo
+                if (!await todoRepository.changeAdminTodo(todoId, data, session))
+                    throw new ConflictError('Todo Not Changed')
+    
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.CHANGE,
+                    entityType : AuditEntityType.TODO,
+                    entityId : todoId,
+                    oldValue : {
+                        title : todo.title,
+                        description : todo.description,
+                        priority : todo.priority,
+                        dueDate : todo.dueDate,
+                    },
+                    newValue : data,
+                    ipAddress
+                }, session)
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return data
     }
 
-    async changeTodoStatus (todoId : Types.ObjectId, status : TodoStatus)
+    async changeTodoStatus (todoId : Types.ObjectId, status : TodoStatus, adminId : Types.ObjectId, ipAddress : string)
     : Promise<TodoStatus> {
         // Get Todo
         const todo = await todoRepository.getAdminTodo(todoId)
@@ -90,15 +116,40 @@ class TodoAdminService {
         if (todo.deletedAt !== null)
             throw new BadRequestError('Can Not Change Deleted Todo')
 
-        // Change Todo Status
-        if (todo.status !== status)
-            if (!await todoRepository.changeAdminTodoStatus(todoId, todo.status, status))
-                throw new ConflictError('Todo Status Not Changed')
+        if (todo.status === status)
+            return status
+
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Change Todo Status
+                if (!await todoRepository.changeAdminTodoStatus(todoId, todo.status, status, session))
+                    throw new ConflictError('Todo Status Not Changed')
+    
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.CHANGE,
+                    entityType : AuditEntityType.TODO,
+                    entityId : todoId,
+                    oldValue : {
+                        status : todo.status
+                    },
+                    newValue : {
+                        status
+                    },
+                    ipAddress
+                }, session)
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return status
     }
 
-    async deleteSoftTodo (todoId : Types.ObjectId)
+    async deleteSoftTodo (todoId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<void> {
         // Get Todo
         const todo = await todoRepository.getAdminTodo(todoId)
@@ -108,14 +159,32 @@ class TodoAdminService {
         if (todo.deletedAt !== null)
             return
 
-        // Delete Todo
-        if (!await todoRepository.deleteAdminSoftTodo(todoId))
-            throw new ConflictError('Todo Not Deleted')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Delete Todo
+                if (!await todoRepository.deleteAdminSoftTodo(todoId, session))
+                    throw new ConflictError('Todo Not Deleted')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.DELETE,
+                    entityType : AuditEntityType.TODO,
+                    entityId : todoId,
+                    reason,
+                    ipAddress
+                }, session)
+            })
+        } finally {
+            await session.endSession()
+        }
 
         return
     }
 
-    async restoreTodo (todoId : Types.ObjectId)
+    async restoreTodo (todoId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<ITodo> {
         // Get Todo
         const todo = await todoRepository.getAdminTodo(todoId)
@@ -125,15 +194,33 @@ class TodoAdminService {
         if (todo.deletedAt === null)
             return todo
 
-        // Restore Todo
-        if (!await todoRepository.restoreAdminTodo(todoId))
-            throw new ConflictError('Todo Not Restored')
+        const session = await mongoose.startSession()
+
+        try {
+            await session.withTransaction(async () => {
+                // Restore Todo
+                if (!await todoRepository.restoreAdminTodo(todoId, session))
+                    throw new ConflictError('Todo Not Restored')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.RESTORE,
+                    entityType : AuditEntityType.TODO,
+                    entityId : todoId,
+                    reason,
+                    ipAddress
+                }, session)
+            })
+        } finally {
+            await session.endSession()
+        }
 
         todo.deletedAt = null
         return todo
     }
 
-    async deleteHardTodo (todoId : Types.ObjectId)
+    async deleteHardTodo (todoId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<void> {
         // Get Todo
         const todo = await todoRepository.getAdminTodo(todoId)
@@ -143,10 +230,29 @@ class TodoAdminService {
         if (todo.deletedAt === null)
             throw new ForbiddenError('Soft Deleted Required First')
 
-        // Delete Todo (Hard)
-        if (!await todoRepository.deleteAdminHardTodo(todoId))
-            throw new ConflictError('Todo Not Deleted')
+        const session = await mongoose.startSession()
 
+        try {
+            await session.withTransaction(async () => {
+                // Delete Todo (Hard)
+                if (!await todoRepository.deleteAdminHardTodo(todoId, session))
+                    throw new ConflictError('Todo Not Deleted')
+
+                // Add Admin Audit
+                await auditRepository.createAudit({
+                    adminId,
+                    action : AuditAction.DELETE_HARD,
+                    entityType : AuditEntityType.TODO,
+                    entityId : todoId,
+                    reason,
+                    ipAddress
+                }, session)
+
+            })
+        } finally {
+            await session.endSession()
+        }
+        
         return
     }
 }
