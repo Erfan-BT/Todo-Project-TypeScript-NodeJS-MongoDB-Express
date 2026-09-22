@@ -8,6 +8,7 @@ vi.mock('../../../src/services/auth.service.js', () => ({
         changePassword : vi.fn(),
         logout: vi.fn(),
         logoutAll: vi.fn(),
+        getUserAccount : vi.fn()
     },
 }))
 
@@ -16,6 +17,8 @@ import authService from '../../../src/services/auth.service.js'
 import { AuthRequest } from '../../../src/middleware/auth.middleware.js'
 import { Types } from 'mongoose'
 import { ChangePasswordDto } from '../../../src/validations/auth.validation.js'
+import { UserTodosState } from '../../../src/types/todo.type.js'
+import { IUser } from '../../../src/models/user.model.js'
 
 describe('AuthController', () => {
 
@@ -574,6 +577,88 @@ describe('AuthController', () => {
                 .mockRejectedValue(error)
 
             await authController.logoutAll(req, res, next)
+
+            expect(next)
+                .toHaveBeenCalledTimes(1)
+
+            expect(next)
+                .toHaveBeenCalledWith(error)
+
+            expect(res.status)
+                .not.toHaveBeenCalled()
+
+            expect(res.json)
+                .not.toHaveBeenCalled()
+        })
+    })
+
+    describe('getUserAccount', () => {
+
+        test('should get user account successfully', async () => {
+            const userId = new Types.ObjectId()
+
+            const req = {
+                user: {
+                    userId,
+                },
+            } as AuthRequest
+
+            const res = {
+                status: vi.fn().mockReturnThis(),
+                json: vi.fn(),
+            } as any
+
+            const next = vi.fn()
+
+            const user = {} as IUser
+            const state = {} as UserTodosState
+
+            vi.mocked(authService.getUserAccount)
+                .mockResolvedValue({user, state})
+
+            await authController.getUserAccount(req, res, next)
+
+            expect(authService.getUserAccount)
+                .toHaveBeenCalledWith(userId)
+
+            expect(res.status)
+                .toHaveBeenCalledWith(200)
+
+            expect(res.json)
+                .toHaveBeenCalledWith({
+                    success: true,
+                    msg: 'User Account Successfully Found',
+                    data : {
+                        user, state
+                    },
+                })
+
+            expect(next)
+                .not.toHaveBeenCalled()
+        })
+
+        test('should pass error to next if getUserAccount fails', async () => {
+            const userId = new Types.ObjectId()
+
+            const error = new Error()
+
+            const req = {
+                user: {
+                    userId,
+                },
+            } as AuthRequest
+
+            const res = {
+                status: vi.fn().mockReturnThis(),
+                json: vi.fn(),
+            } as any
+
+            const next = vi.fn()
+
+            vi.mocked(authService.getUserAccount)
+                .mockRejectedValue(error)
+
+            await authController.getUserAccount(req, res, next)
 
             expect(next)
                 .toHaveBeenCalledTimes(1)

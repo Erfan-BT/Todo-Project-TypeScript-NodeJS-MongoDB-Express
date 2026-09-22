@@ -6,7 +6,8 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
         getUserByUsername: vi.fn(),
         getUserPassword : vi.fn(),
         createUser: vi.fn(),
-        changePassword : vi.fn()
+        changePassword : vi.fn(),
+        getUserAccount : vi.fn()
     }
 }))
 
@@ -33,14 +34,23 @@ vi.mock('../../../src/repository/session.repository.js', () => ({
     }
 }))
 
+vi.mock('../../../src/repository/todo.repository.js', () => ({ 
+    default: { 
+        userTodosState: vi.fn() 
+    } 
+}))
+
 import authService from '../../../src/services/auth.service.js'
 import { Types } from 'mongoose'
 import authRepository from '../../../src/repository/auth.repository.js'
 import argon2 from 'argon2'
 import tokenService from '../../../src/services/token.service.js'
-import { BadRequestError, ConflictError, ForbiddenError } from '../../../src/utils/appError.js'
+import { BadRequestError, ConflictError, ForbiddenError, UnauthorizedError } from '../../../src/utils/appError.js'
 import sessionRepository from '../../../src/repository/session.repository.js'
 import { ChangePasswordDto } from '../../../src/validations/auth.validation.js'
+import { IUser } from '../../../src/models/user.model.js'
+import { UserTodosState } from '../../../src/types/todo.type.js'
+import todoRepository from '../../../src/repository/todo.repository.js'
 
 beforeEach(() => {
     vi.clearAllMocks()
@@ -667,4 +677,107 @@ describe('AuthService.logoutAll', () => {
         expect(sessionRepository.deleteSessions)
             .toHaveBeenCalledWith(userId)
     })
+})
+
+describe('AuthService.getUserAccount', () => {
+
+    const userId = new Types.ObjectId()
+
+    const user = {
+        _id: userId,
+        fullname: 'Erfan',
+        username: 'erfan',
+        password: 'hashed-password',
+        role: 'User',
+        active: true,
+        deletedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    } as IUser
+
+    const state: UserTodosState = {
+        active : 4,
+        deleted : 6,
+        pending : 1,
+        completed : 2,
+        canceled : 1,
+        upcoming : 2,
+        overdue : 2,
+        today : 3,
+    }
+
+    test('should return user and todo state successfully', async () => {
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue(user)
+
+        vi.mocked(todoRepository.userTodosState)
+            .mockResolvedValue(state)
+
+        const result = await authService.getUserAccount(userId)
+
+        expect(result).toEqual({
+            user,
+            state
+        })
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledOnce()
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(todoRepository.userTodosState)
+            .toHaveBeenCalledOnce()
+
+        expect(todoRepository.userTodosState)
+            .toHaveBeenCalledWith(userId)
+    })
+
+    test('should throw UnauthorizedError when user is not found', async () => {
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue(null)
+
+        await expect(
+            authService.getUserAccount(userId)
+        ).rejects.toBeInstanceOf(UnauthorizedError)
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledOnce()
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(todoRepository.userTodosState)
+            .not.toHaveBeenCalled()
+    })
+
+    test('should propagate error when getting user todos state fails', async () => {
+
+        const error = new Error('Database Error')
+
+        vi.mocked(authRepository.getUserById)
+            .mockResolvedValue(user)
+
+        vi.mocked(todoRepository.userTodosState)
+            .mockRejectedValue(error)
+
+        await expect(
+            authService.getUserAccount(userId)
+        ).rejects.toBe(error)
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledOnce()
+
+        expect(authRepository.getUserById)
+            .toHaveBeenCalledWith(userId)
+
+        expect(todoRepository.userTodosState)
+            .toHaveBeenCalledOnce()
+
+        expect(todoRepository.userTodosState)
+            .toHaveBeenCalledWith(userId)
+    })
+
 })
