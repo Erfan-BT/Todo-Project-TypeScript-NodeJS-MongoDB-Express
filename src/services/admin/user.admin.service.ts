@@ -7,6 +7,8 @@ import { ConflictError, ForbiddenError, NotFoundError } from "../../utils/appErr
 import argon2 from "argon2";
 import auditRepository from "../../repository/audit.repository.js";
 import { AuditAction, AuditEntityType } from "../../types/audit.enum.js";
+import { UserTodosState } from "../../types/todo.type.js";
+import todoRepository from "../../repository/todo.repository.js";
 
 class UserAdminService {
     async getAllUsers (qs : UserQSDto)
@@ -19,13 +21,22 @@ class UserAdminService {
     }
 
     async getUser (userId : Types.ObjectId)
-    : Promise<IUser> {
+    : Promise<{
+        user : IUser;
+        state : UserTodosState
+    }> {
         // Get User
         const user = await authRepository.getAdminUserById(userId)
         if (!user)
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
-        return user
+         // Get User Todos State
+        const state = await todoRepository.userTodosState(userId)
+        
+        return {
+            user,
+            state
+        }
     }
 
     async changeUser (userId : Types.ObjectId, userData : ChangeUserDto, adminId : Types.ObjectId, ipAddress : string)
