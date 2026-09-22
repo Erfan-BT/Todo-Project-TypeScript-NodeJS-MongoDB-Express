@@ -25,6 +25,8 @@ import {
     AuditAction,
     AuditEntityType
 } from '../../../src/types/audit.enum.js'
+import todoRepository from '../../../src/repository/todo.repository.js'
+import { UserTodosState } from '../../../src/types/todo.type.js'
 
 
 vi.mock('../../../src/repository/auth.repository.js', () => ({
@@ -43,6 +45,12 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
 vi.mock('../../../src/repository/audit.repository.js', () => ({
     default: {
         createAudit: vi.fn()
+    }
+}))
+
+vi.mock('../../../src/repository/todo.repository.js', () => ({
+    default: {
+        userTodosState: vi.fn()
     }
 }))
 
@@ -89,6 +97,17 @@ describe('UserAdminService', () => {
         ...activeUser,
         active: false,
         deletedAt: new Date()
+    }
+
+    const state : UserTodosState = {
+        active : 1,
+        deleted : 3,
+        canceled : 1,
+        completed : 3,
+        overdue : 3,
+        pending : 3,
+        today : 3,
+        upcoming : 3
     }
 
 
@@ -219,6 +238,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.getAdminUserById)
                 .mockResolvedValue(activeUser as any)
 
+            vi.mocked(todoRepository.userTodosState)
+                .mockResolvedValue(state)
+
 
             const result = await userAdminService.getUser(userId)
 
@@ -229,8 +251,14 @@ describe('UserAdminService', () => {
             expect(authRepository.getAdminUserById)
                 .toHaveBeenCalledWith(userId)
 
+            expect(todoRepository.userTodosState)
+                .toHaveBeenCalledOnce()
+
+            expect(todoRepository.userTodosState)
+                .toHaveBeenCalledWith(userId)
+
             expect(result)
-                .toEqual(activeUser)
+                .toEqual({user : activeUser, state})
         })
 
 
@@ -247,6 +275,9 @@ describe('UserAdminService', () => {
 
             expect(authRepository.getAdminUserById)
                 .toHaveBeenCalledWith(userId)
+
+            expect(todoRepository.userTodosState)
+                .not.toHaveBeenCalledWith(userId)
         })
 
 
