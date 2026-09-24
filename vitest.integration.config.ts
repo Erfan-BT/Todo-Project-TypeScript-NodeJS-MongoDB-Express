@@ -15,6 +15,8 @@ export default defineConfig({
 
         setupFiles: [
             './tests/setup/database.ts'
-        ]
+        ],
+
+        fileParallelism: false
     }
 })
