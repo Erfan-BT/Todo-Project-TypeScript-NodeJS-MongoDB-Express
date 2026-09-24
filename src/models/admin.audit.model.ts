@@ -25,12 +25,14 @@ export const auditSchema = new Schema<IAudit>(
         action : {
             type : String,
             enum : AuditAction,
-            required : true
+            required : true,
+            index : true
         },
         entityType : {
             type : String,
             enum : AuditEntityType,
-            required : true
+            required : true,
+            index : true
         },
         entityId : {
             type : Types.ObjectId,

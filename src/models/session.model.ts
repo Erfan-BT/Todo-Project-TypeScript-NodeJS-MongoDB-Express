@@ -44,3 +44,8 @@ export const sessionSchema = new Schema<ISession>(
     { userId: 1, device: 1 },
     { unique: true }
 )
+
+sessionSchema.index({
+    userId : 1,
+    jti : 1
+})

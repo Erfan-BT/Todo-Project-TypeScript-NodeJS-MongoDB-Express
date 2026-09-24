@@ -47,3 +47,8 @@ export const userSchema = new Schema<IUser>(
         timestamps : true,
     }
 )
+
+userSchema.index({
+    deletedAt: 1,
+    createdAt: -1
+})

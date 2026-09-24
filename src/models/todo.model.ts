@@ -55,3 +55,21 @@ export const todoSchema = new Schema<ITodo>(
         timestamps : true
     }
 )
+
+todoSchema.index({
+    userId: 1,
+    createdAt: -1,
+    _id: -1
+})
+
+todoSchema.index({
+    userId: 1,
+    priority: -1,
+    _id: -1
+})
+
+todoSchema.index({
+    userId: 1,
+    dueDate: -1,
+    _id: -1
+})
