@@ -27,6 +27,7 @@ import {
 } from '../../../src/types/audit.enum.js'
 import todoRepository from '../../../src/repository/todo.repository.js'
 import { UserTodosState } from '../../../src/types/todo.type.js'
+import sessionRepository from '../../../src/repository/session.repository.js'
 
 
 vi.mock('../../../src/repository/auth.repository.js', () => ({
@@ -51,6 +52,12 @@ vi.mock('../../../src/repository/audit.repository.js', () => ({
 vi.mock('../../../src/repository/todo.repository.js', () => ({
     default: {
         userTodosState: vi.fn()
+    }
+}))
+
+vi.mock('../../../src/repository/session.repository.js', () => ({
+    default: {
+        deleteSessions: vi.fn()
     }
 }))
 
@@ -312,6 +319,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
+            vi.mocked(sessionRepository.deleteSessions)
+                .mockResolvedValue(true)
+
 
             const result = await userAdminService.changeUser(
                 userId,
@@ -335,6 +345,11 @@ describe('UserAdminService', () => {
                     userId,
                     userData,
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
 
@@ -383,6 +398,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
+            vi.mocked(sessionRepository.deleteSessions)
+                .mockResolvedValue(true)
+
 
             const result = await userAdminService.changeUser(
                 userId,
@@ -397,6 +415,11 @@ describe('UserAdminService', () => {
                     userId,
                     expectedData,
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
 
@@ -441,6 +464,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
+            vi.mocked(sessionRepository.deleteSessions)
+                .mockResolvedValue(true)
+
 
             const result = await userAdminService.changeUser(
                 userId,
@@ -455,6 +481,11 @@ describe('UserAdminService', () => {
                     userId,
                     expectedData,
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
 
@@ -495,6 +526,9 @@ describe('UserAdminService', () => {
             expect(authRepository.changeUser)
                 .not.toHaveBeenCalled()
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
+
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
 
@@ -519,6 +553,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
+            vi.mocked(sessionRepository.deleteSessions)
+                .mockResolvedValue(true)
+
 
             const result = await userAdminService.changeUser(
                 userId,
@@ -533,6 +570,11 @@ describe('UserAdminService', () => {
                     userId,
                     userData,
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
 
@@ -572,6 +614,9 @@ describe('UserAdminService', () => {
             expect(authRepository.changeUser)
                 .not.toHaveBeenCalled()
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
+
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
 
@@ -600,6 +645,8 @@ describe('UserAdminService', () => {
                 )
             ).rejects.toBeInstanceOf(ConflictError)
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
@@ -618,6 +665,9 @@ describe('UserAdminService', () => {
                 .mockResolvedValue(activeUser as any)
 
             vi.mocked(authRepository.changeUser)
+                .mockResolvedValue(true)
+
+            vi.mocked(sessionRepository.deleteSessions)
                 .mockResolvedValue(true)
 
             vi.mocked(auditRepository.createAudit)
@@ -643,6 +693,11 @@ describe('UserAdminService', () => {
                         fullname: 'New Name'
                     },
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
             expect(auditRepository.createAudit)

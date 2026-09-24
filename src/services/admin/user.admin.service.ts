@@ -9,6 +9,7 @@ import auditRepository from "../../repository/audit.repository.js";
 import { AuditAction, AuditEntityType } from "../../types/audit.enum.js";
 import { UserTodosState } from "../../types/todo.type.js";
 import todoRepository from "../../repository/todo.repository.js";
+import sessionRepository from "../../repository/session.repository.js";
 
 class UserAdminService {
     async getAllUsers (qs : UserQSDto)
@@ -81,6 +82,9 @@ class UserAdminService {
                 }, session)
 
             })
+
+            // Revoke User Sessions
+            await sessionRepository.deleteSessions(userId)
         } finally {
             await session.endSession()
         }

@@ -38,7 +38,7 @@ class SessionRepository {
             userId,
             jti
         })
-        return result.deletedCount === 0
+        return result.deletedCount === 1
     }
 }
 

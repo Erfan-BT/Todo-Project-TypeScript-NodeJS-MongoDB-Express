@@ -82,7 +82,7 @@ class TokenService {
     async revokeRefreshTokenSession (userId : Types.ObjectId, jti : string)
     : Promise<void> {
         if (!await sessionRepository.deleteSession(userId, jti))
-            throw new BadRequestError()
+            throw new BadRequestError('Refresh Token Not Revoked')
     }
 
     async refreshTokens (userId : Types.ObjectId, device : string, jti : string)
