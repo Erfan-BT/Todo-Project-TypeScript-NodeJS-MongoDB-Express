@@ -179,6 +179,10 @@ class UserAdminService {
 
     async deleteUser (userId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<void> {
+        // Check Ids
+        if (userId === adminId)
+            throw new ForbiddenError('Can Not Delete Yourself')
+
         // Get User
         const user = await authRepository.getAdminUserById(userId)
         if (!user)
@@ -206,6 +210,9 @@ class UserAdminService {
                 }, session)
 
             })
+                
+            // Revoke User Sessions
+            await sessionRepository.deleteSessions(userId)
         } finally {
             await session.endSession()
         }
