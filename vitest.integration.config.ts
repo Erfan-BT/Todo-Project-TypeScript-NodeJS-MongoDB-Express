@@ -5,9 +5,6 @@ const result = dotenv.config({
     path: '.env.test'
 })
 
-console.log(result)
-console.log('TEST_DB_URL:', process.env.TEST_DB_URL)
-
 export default defineConfig({
     test: {
         environment: 'node',

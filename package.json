@@ -10,7 +10,8 @@
     "build": "tsc -w",
     "start": "nodemon dist/server.js",
     "test:run": "vitest run",
-    "test": "vitest"
+    "test": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {
     "argon2": "^0.45.1",
