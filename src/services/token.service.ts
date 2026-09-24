@@ -4,7 +4,7 @@ import { env } from '../configs/env.config.js'
 import { randomUUID } from 'crypto'
 import sessionRepository from '../repository/session.repository.js';
 import { Types } from 'mongoose';
-import { BadRequestError } from '../utils/appError.js';
+import { BadRequestError, UnauthorizedError } from '../utils/appError.js';
 
 class TokenService {
     generateAccessToken (userId : Types.ObjectId, jti : string)
@@ -54,9 +54,13 @@ class TokenService {
         userId : Types.ObjectId;
         jti : string;
     } {
-        return jwt.verify(token, env.JWT_REFRESH_SECRET) as {
-            userId : Types.ObjectId,
-            jti : string
+        try {
+            return jwt.verify(token, env.JWT_REFRESH_SECRET) as {
+                userId : Types.ObjectId,
+                jti : string
+            }
+        } catch (error) {
+            throw new BadRequestError('Invalid Refresh Token')
         }
     }
 
@@ -65,9 +69,13 @@ class TokenService {
         userId : Types.ObjectId;
         jti : string;
     } {
-        return jwt.verify(token, env.JWT_SECRET) as {
-            userId : Types.ObjectId,
-            jti : string
+        try {
+            return jwt.verify(token, env.JWT_SECRET) as {
+                userId : Types.ObjectId,
+                jti : string
+            }
+        } catch (error) {
+            throw new UnauthorizedError('Invalid Access Token')
         }
     }
 

@@ -111,12 +111,12 @@ class AuthService {
 
         const session = await sessionRepository.getSession(decode.userId, decode.jti)
         if (!session)
-            throw new BadRequestError()
+            throw new BadRequestError('Session Not Found')
 
         // Check Hashed Token
         const verifyResult = await argon2.verify(session.refreshTokenHash, refreshToken)
         if (!verifyResult)
-            throw new BadRequestError()
+            throw new BadRequestError('Session Not Verified')
 
         // Token Rotation
         const tokens = await tokenService.refreshTokens(decode.userId, device, decode.jti)

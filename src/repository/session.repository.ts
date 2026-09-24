@@ -23,11 +23,11 @@ class SessionRepository {
         })
     }
 
-    async deleteSessions (userId : Types.ObjectId, device ?: string)
+    async deleteSessions (userId : Types.ObjectId, jti ?: string)
     : Promise<boolean> {
         const result = await Session.deleteMany({
             userId,
-            ...(device ? {device} : {})
+            ...(jti ? {jti} : {})
         })
         return result.deletedCount > 0
     }
