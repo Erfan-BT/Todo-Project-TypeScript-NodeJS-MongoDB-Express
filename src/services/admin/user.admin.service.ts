@@ -123,7 +123,10 @@ class UserAdminService {
                     ipAddress
                     }, session)
 
-                })
+            })
+                
+            // Revoke User Sessions
+            await sessionRepository.deleteSessions(userId)
         } finally {
             await session.endSession()
         }

@@ -696,9 +696,7 @@ describe('UserAdminService', () => {
                 )
 
             expect(sessionRepository.deleteSessions)
-                .toHaveBeenCalledWith(
-                    userId
-                )
+                .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
                 .toHaveBeenCalledOnce()
@@ -725,6 +723,9 @@ describe('UserAdminService', () => {
                 .mockResolvedValue(hashedPassword as never)
 
             vi.mocked(authRepository.changeAdminPassword)
+                .mockResolvedValue(true)
+
+            vi.mocked(sessionRepository.deleteSessions)
                 .mockResolvedValue(true)
 
 
@@ -765,6 +766,11 @@ describe('UserAdminService', () => {
                     session
                 )
 
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
+                )
+
 
             expect(session.withTransaction)
                 .toHaveBeenCalledOnce()
@@ -800,6 +806,9 @@ describe('UserAdminService', () => {
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
+
             expect(mongoose.startSession)
                 .not.toHaveBeenCalled()
         })
@@ -829,6 +838,9 @@ describe('UserAdminService', () => {
                 .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
                 .not.toHaveBeenCalled()
 
             expect(mongoose.startSession)
@@ -865,6 +877,9 @@ describe('UserAdminService', () => {
 
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
+            
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
 
             expect(session.endSession)
                 .toHaveBeenCalledOnce()
@@ -888,6 +903,8 @@ describe('UserAdminService', () => {
             vi.mocked(auditRepository.createAudit)
                 .mockRejectedValue(auditError)
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
 
             await expect(
                 userAdminService.changeUserPassword(
