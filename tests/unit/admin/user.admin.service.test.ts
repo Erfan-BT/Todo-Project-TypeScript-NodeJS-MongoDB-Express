@@ -936,6 +936,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.changeUserStatus)
                 .mockResolvedValue(true)
 
+            vi.mocked(sessionRepository.deleteSessions)
+                .mockResolvedValue(true)
+
 
             const result = await userAdminService.changeUserStatus(
                 userId,
@@ -966,6 +969,11 @@ describe('UserAdminService', () => {
                     session
                 )
 
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
+                )
+
 
             expect(result)
                 .toBe(true)
@@ -978,6 +986,36 @@ describe('UserAdminService', () => {
         })
 
 
+        it('should throw ForbiddenError if userId and adminId same', async () => {
+
+            vi.mocked(authRepository.getAdminUserById)
+                .mockResolvedValue(inactiveUser as any)
+
+
+            await expect(
+                userAdminService.changeUserStatus(
+                    adminId,
+                    adminId,
+                    'Admin action',
+                    ipAddress
+                )
+            ).rejects.toBeInstanceOf(ForbiddenError)
+
+
+            expect(authRepository.changeUserStatus)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
+                .not.toHaveBeenCalled()
+        })
+
+
         it('should deactivate active user', async () => {
 
             const reason = 'Administrative action'
@@ -987,6 +1025,9 @@ describe('UserAdminService', () => {
                 .mockResolvedValue(activeUser as any)
 
             vi.mocked(authRepository.changeUserStatus)
+                .mockResolvedValue(true)
+
+            vi.mocked(sessionRepository.deleteSessions)
                 .mockResolvedValue(true)
 
 
@@ -1017,6 +1058,11 @@ describe('UserAdminService', () => {
                         ipAddress
                     },
                     session
+                )
+
+            expect(sessionRepository.deleteSessions)
+                .toHaveBeenCalledWith(
+                    userId
                 )
 
 
@@ -1052,6 +1098,9 @@ describe('UserAdminService', () => {
 
             expect(auditRepository.createAudit)
                 .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
         })
 
 
@@ -1075,6 +1124,9 @@ describe('UserAdminService', () => {
                 .not.toHaveBeenCalled()
 
             expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
                 .not.toHaveBeenCalled()
 
             expect(mongoose.startSession)
@@ -1102,6 +1154,9 @@ describe('UserAdminService', () => {
 
 
             expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
                 .not.toHaveBeenCalled()
 
             expect(session.endSession)
@@ -1133,6 +1188,8 @@ describe('UserAdminService', () => {
                 )
             ).rejects.toBe(auditError)
 
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
 
             expect(session.endSession)
                 .toHaveBeenCalledOnce()

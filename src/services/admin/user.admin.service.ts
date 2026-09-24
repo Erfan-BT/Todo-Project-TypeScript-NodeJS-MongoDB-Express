@@ -136,6 +136,10 @@ class UserAdminService {
 
     async changeUserStatus (userId : Types.ObjectId, adminId : Types.ObjectId, reason : string, ipAddress : string)
     : Promise<boolean> {
+        // Check Ids
+        if (userId === adminId)
+            throw new ForbiddenError('Can Not Change Your Status')
+
         // Get User
         const user = await authRepository.getAdminUserById(userId)
         if (!user)
@@ -163,6 +167,9 @@ class UserAdminService {
                 }, session)
 
             })
+                
+            // Revoke User Sessions
+            await sessionRepository.deleteSessions(userId)
         } finally {
             await session.endSession()
         }
