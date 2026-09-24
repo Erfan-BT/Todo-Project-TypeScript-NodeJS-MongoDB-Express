@@ -17,6 +17,7 @@ async function startServer() {
         })
     } catch (error) {
         logger.fatal({error : String(error)}, "Server Not Run")
+        process.exit(1)
     }
 }
 
