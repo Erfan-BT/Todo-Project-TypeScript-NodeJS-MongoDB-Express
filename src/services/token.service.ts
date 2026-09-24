@@ -81,7 +81,7 @@ class TokenService {
 
     async revokeRefreshTokenSession (userId : Types.ObjectId, jti : string)
     : Promise<void> {
-        if (!await sessionRepository.deleteSessions(userId, jti))
+        if (!await sessionRepository.deleteSession(userId, jti))
             throw new BadRequestError()
     }
 
