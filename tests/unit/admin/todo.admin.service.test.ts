@@ -7,7 +7,7 @@ import todoRepository from '../../../src/repository/todo.repository.js'
 import authRepository from '../../../src/repository/auth.repository.js'
 import auditRepository from '../../../src/repository/audit.repository.js'
 
-import { TodoQuaryBuilder } from '../../../src/builders/todo.quary.builder.js'
+import { TodoQueryBuilder } from '../../../src/builders/todo.query.builder.js'
 
 import {
     BadRequestError,
@@ -49,8 +49,8 @@ vi.mock('../../../src/repository/audit.repository.js', () => ({
 }))
 
 
-vi.mock('../../../src/builders/todo.quary.builder.js', () => ({
-    TodoQuaryBuilder: {
+vi.mock('../../../src/builders/todo.query.builder.js', () => ({
+    TodoQueryBuilder: {
         build: vi.fn()
     }
 }))
@@ -156,7 +156,7 @@ describe('TodoAdminService', () => {
                 })
             ]
 
-            vi.mocked(TodoQuaryBuilder.build)
+            vi.mocked(TodoQueryBuilder.build)
                 .mockReturnValue(options)
 
             vi.mocked(todoRepository.getAdminUserTodos)
@@ -165,7 +165,7 @@ describe('TodoAdminService', () => {
             const result =
                 await todoAdminService.getAllTodos(qs)
 
-            expect(TodoQuaryBuilder.build)
+            expect(TodoQueryBuilder.build)
                 .toHaveBeenCalledWith(qs)
 
             expect(authRepository.getAdminUserByUsername)
@@ -214,7 +214,7 @@ describe('TodoAdminService', () => {
             const user = createUser()
             const todos = [createTodo()]
 
-            vi.mocked(TodoQuaryBuilder.build)
+            vi.mocked(TodoQueryBuilder.build)
                 .mockReturnValue(options)
 
             vi.mocked(authRepository.getAdminUserByUsername)
@@ -271,7 +271,7 @@ describe('TodoAdminService', () => {
                 }
             }
 
-            vi.mocked(TodoQuaryBuilder.build)
+            vi.mocked(TodoQueryBuilder.build)
                 .mockReturnValue(options)
 
             vi.mocked(authRepository.getAdminUserByUsername)
@@ -308,7 +308,7 @@ describe('TodoAdminService', () => {
 
             const error = new Error('Database Error')
 
-            vi.mocked(TodoQuaryBuilder.build)
+            vi.mocked(TodoQueryBuilder.build)
                 .mockReturnValue(options)
 
             vi.mocked(todoRepository.getAdminUserTodos)

@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { ChangeTodoDto, CreateTodoDto, TodoQSDto } from "../validations/todo.validation.js";
-import { TodoQuaryBuilder } from "../builders/todo.quary.builder.js";
+import { TodoQueryBuilder } from "../builders/todo.query.builder.js";
 import todoRepository from "../repository/todo.repository.js";
 import { ITodo } from "../models/todo.model.js";
 import { BadRequestError, ConflictError, NotFoundError } from "../utils/appError.js";
@@ -10,7 +10,7 @@ class TodoService {
     async getUserTodos (qs : TodoQSDto, userId : Types.ObjectId)
     : Promise<ITodo[]> {
         // Create Options
-        const options = TodoQuaryBuilder.build(qs)
+        const options = TodoQueryBuilder.build(qs)
 
         // Get Tdods
         return await todoRepository.getUserTodos(userId, options.limit, options.skip, options.where, options.sort)

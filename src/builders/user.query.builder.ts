@@ -1,10 +1,10 @@
-import { SortType } from "../types/sort.type.js";
-import { TodoSort } from "../types/todo.enum.js";
-import { escapeRegex } from "../utils/escape.regex.js";
-import { TodoQSDto } from "../validations/todo.validation.js";
+import { SortType } from "../types/sort.type.js"
+import { UserSort } from "../types/user.enum.js"
+import { escapeRegex } from "../utils/escape.regex.js"
+import { UserQSDto } from "../validations/auth.validation.js"
 
-export class TodoQuaryBuilder {
-    static build (qs : TodoQSDto) {
+export class UserQueryBuilder {
+    static build (qs : UserQSDto) {
         const page = qs.page
         const limit = qs.limit
         const skip = (page - 1) * limit
@@ -20,7 +20,7 @@ export class TodoQuaryBuilder {
         }
     }
 
-    static buildWhere (qs : TodoQSDto) {
+    static buildWhere (qs : UserQSDto) {
         let where = []
 
         if (qs.q !== undefined) {
@@ -28,13 +28,13 @@ export class TodoQuaryBuilder {
             where.push({
                 $or: [
                     {
-                        title: {
+                        username : {
                             $regex: q,
                             $options: 'i'
                         }
                     },
                     {
-                        description: {
+                        fullname : {
                             $regex: q,
                             $options: 'i'
                         }
@@ -43,19 +43,19 @@ export class TodoQuaryBuilder {
             })
         }
 
-        if (qs.priority !== undefined)
-            where.push({
-                priority : qs.priority
-            })
-
         if (qs.status !== undefined)
             where.push({
-                status : qs.status
+                active : qs.status
             })
 
-        if (qs.showDeleted !== 'All')
+        if (qs.role !== undefined)
             where.push({
-                deletedAt : qs.showDeleted === 'Yes' ? { $ne : null } : { $eq : null }
+                role : qs.role
+            })
+
+        if (qs.showDeleted !== undefined)
+            where.push({
+                deletedAt : qs.showDeleted ? { $ne: null } : null
             })
 
         const dateCondition: {
@@ -75,39 +75,25 @@ export class TodoQuaryBuilder {
             })
         }
 
-        const dueDateCondition: {
-            $gte ?: Date;
-            $lte ?: Date;
-        } = {};
-
-        if (qs.dueFrom !== undefined)
-            dueDateCondition.$gte = qs.dueFrom
-
-        if (qs.dueTo !== undefined)
-            dueDateCondition.$lte = qs.dueTo
-
-        if (Object.keys(dueDateCondition).length) {
-            where.push({
-                dueDate : dueDateCondition
-            })
-        }
+        if(!where.length)
+            return {}
 
         return {
             $and : where
         }
     }
 
-    static buildOrder (qs : TodoQSDto) {
+    static buildOrder (qs : UserQSDto) {
         const sortType = qs.sortType === SortType.ASC ? 1 : -1
         switch (qs.sort) {
-            case TodoSort.CREATEDAT:
+            case UserSort.CREATEDAT:
                 return { createdAt : sortType, _id: sortType }
 
-            case TodoSort.PRIORITY:
-                return { priority : sortType, _id: sortType }
+            case UserSort.USERNAME:
+                return { username : sortType, _id: sortType }
 
-            case TodoSort.DUEDATE:
-                return { dueDate : sortType, _id: sortType }
+            case UserSort.FULLNAME:
+                return { fullname : sortType, _id: sortType }
         
             default:
                 return { createdAt : sortType, _id: sortType }

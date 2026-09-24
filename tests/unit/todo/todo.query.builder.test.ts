@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TodoQuaryBuilder } from '../../../src/builders/todo.quary.builder.js'
+import { TodoQueryBuilder } from '../../../src/builders/todo.query.builder.js'
 import {
     TodoSort,
     TodoStatus
@@ -8,7 +8,7 @@ import { TodoQSDto } from '../../../src/validations/todo.validation.js'
 import { SortType } from '../../../src/types/sort.type.js'
 
 
-describe('TodoQuaryBuilder', () => {
+describe('TodoQueryBuilder', () => {
 
     describe('buildWhere', () => {
 
@@ -22,7 +22,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'No'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -47,7 +47,7 @@ describe('TodoQuaryBuilder', () => {
                 q: 'typescript'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -83,7 +83,7 @@ describe('TodoQuaryBuilder', () => {
                 priority: 5
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -106,7 +106,7 @@ describe('TodoQuaryBuilder', () => {
                 status: TodoStatus.COMPLETED
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -128,7 +128,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'Yes'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -152,7 +152,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: []
@@ -173,7 +173,7 @@ describe('TodoQuaryBuilder', () => {
                 from
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -200,7 +200,7 @@ describe('TodoQuaryBuilder', () => {
                 to
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -229,7 +229,7 @@ describe('TodoQuaryBuilder', () => {
                 to
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -257,7 +257,7 @@ describe('TodoQuaryBuilder', () => {
                 dueFrom
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -284,7 +284,7 @@ describe('TodoQuaryBuilder', () => {
                 dueTo
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -313,7 +313,7 @@ describe('TodoQuaryBuilder', () => {
                 dueTo
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -355,7 +355,7 @@ describe('TodoQuaryBuilder', () => {
                 dueTo
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildWhere(qs)
+            const result = TodoQueryBuilder.buildWhere(qs)
 
             expect(result).toEqual({
                 $and: [
@@ -412,7 +412,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.ASC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 createdAt: 1,
@@ -428,7 +428,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.DESC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 createdAt: -1,
@@ -444,7 +444,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.ASC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 priority: 1,
@@ -460,7 +460,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.DESC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 priority: -1,
@@ -476,7 +476,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.ASC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 dueDate: 1,
@@ -492,7 +492,7 @@ describe('TodoQuaryBuilder', () => {
                 sortType: SortType.DESC
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.buildOrder(qs)
+            const result = TodoQueryBuilder.buildOrder(qs)
 
             expect(result).toEqual({
                 dueDate: -1,
@@ -519,7 +519,7 @@ describe('TodoQuaryBuilder', () => {
                 status: TodoStatus.PENDING
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result).toEqual({
                 limit: 10,
@@ -577,7 +577,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result.skip)
                 .toBe(0)
@@ -599,7 +599,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result.skip)
                 .toBe(80)
@@ -621,7 +621,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result.sort)
                 .toEqual({
@@ -643,7 +643,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result.sort)
                 .toEqual({
@@ -665,7 +665,7 @@ describe('TodoQuaryBuilder', () => {
                 showDeleted: 'All'
             } as TodoQSDto
 
-            const result = TodoQuaryBuilder.build(qs)
+            const result = TodoQueryBuilder.build(qs)
 
             expect(result.sort)
                 .toEqual({

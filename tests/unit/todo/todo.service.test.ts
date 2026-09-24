@@ -3,7 +3,7 @@ import { Types } from 'mongoose'
 
 import todoService from '../../../src/services/todo.service.js'
 import todoRepository from '../../../src/repository/todo.repository.js'
-import { TodoQuaryBuilder } from '../../../src/builders/todo.quary.builder.js'
+import { TodoQueryBuilder } from '../../../src/builders/todo.query.builder.js'
 
 import {
     BadRequestError,
@@ -28,8 +28,8 @@ vi.mock('../../../src/repository/todo.repository.js', () => ({
 }))
 
 
-vi.mock('../../../src/builders/todo.quary.builder.js', () => ({
-    TodoQuaryBuilder: {
+vi.mock('../../../src/builders/todo.query.builder.js', () => ({
+    TodoQueryBuilder: {
         build: vi.fn()
     }
 }))
@@ -81,7 +81,7 @@ describe('TodoService', () => {
                 }
             ]
 
-            vi.mocked(TodoQuaryBuilder.build)
+            vi.mocked(TodoQueryBuilder.build)
                 .mockReturnValue(options)
 
             vi.mocked(todoRepository.getUserTodos)
@@ -92,7 +92,7 @@ describe('TodoService', () => {
                 userId
             )
 
-            expect(TodoQuaryBuilder.build)
+            expect(TodoQueryBuilder.build)
                 .toHaveBeenCalledWith(qs)
 
             expect(todoRepository.getUserTodos)

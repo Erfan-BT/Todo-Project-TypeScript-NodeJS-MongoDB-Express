@@ -12,7 +12,7 @@ import mongoose, { Types } from 'mongoose'
 import userAdminService from '../../../src/services/admin/user.admin.service.js'
 import authRepository from '../../../src/repository/auth.repository.js'
 import auditRepository from '../../../src/repository/audit.repository.js'
-import { UserQuaryBuilder } from '../../../src/builders/user.quary.builder.js'
+import { UserQueryBuilder } from '../../../src/builders/user.query.builder.js'
 import argon2 from 'argon2'
 
 import {
@@ -62,8 +62,8 @@ vi.mock('../../../src/repository/session.repository.js', () => ({
 }))
 
 
-vi.mock('../../../src/builders/user.quary.builder.js', () => ({
-    UserQuaryBuilder: {
+vi.mock('../../../src/builders/user.query.builder.js', () => ({
+    UserQueryBuilder: {
         build: vi.fn()
     }
 }))
@@ -173,7 +173,7 @@ describe('UserAdminService', () => {
                 inactiveUser
             ]
 
-            vi.mocked(UserQuaryBuilder.build)
+            vi.mocked(UserQueryBuilder.build)
                 .mockReturnValue(options as any)
 
             vi.mocked(authRepository.getAllUsers)
@@ -183,10 +183,10 @@ describe('UserAdminService', () => {
             const result = await userAdminService.getAllUsers(qs)
 
 
-            expect(UserQuaryBuilder.build)
+            expect(UserQueryBuilder.build)
                 .toHaveBeenCalledOnce()
 
-            expect(UserQuaryBuilder.build)
+            expect(UserQueryBuilder.build)
                 .toHaveBeenCalledWith(qs)
 
             expect(authRepository.getAllUsers)
@@ -224,7 +224,7 @@ describe('UserAdminService', () => {
             const error = new Error('Database Error')
 
 
-            vi.mocked(UserQuaryBuilder.build)
+            vi.mocked(UserQueryBuilder.build)
                 .mockReturnValue(options as any)
 
             vi.mocked(authRepository.getAllUsers)

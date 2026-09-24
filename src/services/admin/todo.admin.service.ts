@@ -1,5 +1,5 @@
 import mongoose, { Types } from "mongoose";
-import { TodoQuaryBuilder } from "../../builders/todo.quary.builder.js";
+import { TodoQueryBuilder } from "../../builders/todo.query.builder.js";
 import { ITodo } from "../../models/todo.model.js";
 import todoRepository from "../../repository/todo.repository.js";
 import { ChangeTodoDto, TodoQSDto } from "../../validations/todo.validation.js";
@@ -14,7 +14,7 @@ class TodoAdminService {
     async getAllTodos (qs : TodoQSDto)
     : Promise<ITodo[]> {
         // Create Options
-        const options = TodoQuaryBuilder.build(qs)
+        const options = TodoQueryBuilder.build(qs)
 
         let userId : Types.ObjectId | null = null
         if (qs.username !== undefined) {

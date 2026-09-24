@@ -1,5 +1,5 @@
 import mongoose, { Types } from "mongoose";
-import { UserQuaryBuilder } from "../../builders/user.quary.builder.js";
+import { UserQueryBuilder } from "../../builders/user.query.builder.js";
 import { IUser } from "../../models/user.model.js";
 import authRepository from "../../repository/auth.repository.js";
 import { ChangeUserDto, UserQSDto } from "../../validations/auth.validation.js";
@@ -15,7 +15,7 @@ class UserAdminService {
     async getAllUsers (qs : UserQSDto)
     : Promise<IUser[]> {
         // Create Options
-        const options = UserQuaryBuilder.build(qs)
+        const options = UserQueryBuilder.build(qs)
 
         // Get Users
         return await authRepository.getAllUsers(options.limit, options.skip, options.where, options.sort)
