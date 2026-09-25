@@ -34,6 +34,7 @@ vi.mock('../../../src/repository/auth.repository.js', () => ({
     default: {
         getAllUsers: vi.fn(),
         getAdminUserById: vi.fn(),
+        getAdminUserByUsername : vi.fn(),
         changeUser: vi.fn(),
         changeAdminPassword: vi.fn(),
         changeUserStatus: vi.fn(),
@@ -316,6 +317,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.getAdminUserById)
                 .mockResolvedValue(activeUser as any)
 
+            vi.mocked(authRepository.getAdminUserByUsername)
+                .mockResolvedValue(null)
+
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
@@ -339,6 +343,9 @@ describe('UserAdminService', () => {
 
             expect(authRepository.getAdminUserById)
                 .toHaveBeenCalledWith(userId)
+
+            expect(authRepository.getAdminUserByUsername)
+                .toHaveBeenCalledWith(userData.username)
 
             expect(authRepository.changeUser)
                 .toHaveBeenCalledWith(
@@ -409,6 +416,8 @@ describe('UserAdminService', () => {
                 ipAddress
             )
 
+            expect(authRepository.getAdminUserByUsername)
+                .not.toHaveBeenCalled()
 
             expect(authRepository.changeUser)
                 .toHaveBeenCalledWith(
@@ -461,6 +470,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.getAdminUserById)
                 .mockResolvedValue(activeUser as any)
 
+            vi.mocked(authRepository.getAdminUserByUsername)
+                .mockResolvedValue(null)
+
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
@@ -475,6 +487,8 @@ describe('UserAdminService', () => {
                 ipAddress
             )
 
+            expect(authRepository.getAdminUserByUsername)
+                .toHaveBeenCalledWith(userData.username)
 
             expect(authRepository.changeUser)
                 .toHaveBeenCalledWith(
@@ -502,6 +516,47 @@ describe('UserAdminService', () => {
                 .toEqual(expectedData)
         })
 
+        it('should throw ConflictError when new username already exists', async () => {
+
+            const userData = {
+                fullname: activeUser.fullname,
+                username: 'new_exists_username'
+            }
+
+
+            vi.mocked(authRepository.getAdminUserById)
+                .mockResolvedValue(activeUser as any)
+
+            vi.mocked(authRepository.getAdminUserByUsername)
+                .mockResolvedValue(activeUser as any)
+
+
+            await expect(
+                userAdminService.changeUser(
+                    userId,
+                    userData,
+                    adminId,
+                    ipAddress
+                )
+            ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(authRepository.getAdminUserByUsername)
+                .toHaveBeenCalledWith(userData.username)
+
+            expect(authRepository.changeUser)
+                .not.toHaveBeenCalled()
+
+            expect(sessionRepository.deleteSessions)
+                .not.toHaveBeenCalled()
+
+            expect(auditRepository.createAudit)
+                .not.toHaveBeenCalled()
+
+            expect(mongoose.startSession)
+                .not.toHaveBeenCalled()
+
+        })
+
 
         it('should not update repository when nothing changed', async () => {
 
@@ -522,6 +577,9 @@ describe('UserAdminService', () => {
                 ipAddress
             )
 
+
+            expect(authRepository.getAdminUserByUsername)
+                .not.toHaveBeenCalled()
 
             expect(authRepository.changeUser)
                 .not.toHaveBeenCalled()
@@ -550,6 +608,9 @@ describe('UserAdminService', () => {
             vi.mocked(authRepository.getAdminUserById)
                 .mockResolvedValue(deletedUser as any)
 
+            vi.mocked(authRepository.getAdminUserByUsername)
+                .mockResolvedValue(null)
+
             vi.mocked(authRepository.changeUser)
                 .mockResolvedValue(true)
 
@@ -564,6 +625,8 @@ describe('UserAdminService', () => {
                 ipAddress
             )
 
+            expect(authRepository.getAdminUserByUsername)
+                .toHaveBeenCalledWith(userData.username)
 
             expect(authRepository.changeUser)
                 .toHaveBeenCalledWith(
@@ -611,6 +674,9 @@ describe('UserAdminService', () => {
             ).rejects.toBeInstanceOf(NotFoundError)
 
 
+            expect(authRepository.getAdminUserByUsername)
+                .not.toHaveBeenCalled()
+
             expect(authRepository.changeUser)
                 .not.toHaveBeenCalled()
 
@@ -644,6 +710,9 @@ describe('UserAdminService', () => {
                     ipAddress
                 )
             ).rejects.toBeInstanceOf(ConflictError)
+
+            expect(authRepository.getAdminUserByUsername)
+                .not.toHaveBeenCalled()
 
             expect(sessionRepository.deleteSessions)
                 .not.toHaveBeenCalled()
@@ -685,6 +754,8 @@ describe('UserAdminService', () => {
                 )
             ).rejects.toBe(auditError)
 
+            expect(authRepository.getAdminUserByUsername)
+                .not.toHaveBeenCalled()
 
             expect(authRepository.changeUser)
                 .toHaveBeenCalledWith(

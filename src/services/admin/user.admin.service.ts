@@ -59,6 +59,13 @@ class UserAdminService {
         if (!Object.keys(data).length)
             return data
 
+        // Check Username
+        if (data.username !== undefined) {
+            const existsUser = await authRepository.getAdminUserByUsername(data.username)
+            if (existsUser)
+                throw new ConflictError('This Username Already Exists')
+        }
+
         const session = await mongoose.startSession()
 
         try {
