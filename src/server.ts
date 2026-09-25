@@ -3,6 +3,7 @@ import app from './app.js'
 import { env } from './configs/env.config.js'
 import { logger } from './configs/pino.config.js'
 import { connectDB } from './configs/mongoose.config.js'
+import { gracefulShutdown } from './shutdown.js'
 
 const port = env.SERVER_PORT
 
@@ -12,8 +13,17 @@ async function startServer() {
         await connectDB()
         
         // Start Server
-        app.listen(port, () => {
+        const server = app.listen(port, () => {
             logger.info(`Server Run On Port ${port}`)
+        })
+
+        // Graceful Shutdown
+        process.on('SIGTERM', () => {
+            gracefulShutdown(server, 'SIGTERM')
+        })
+
+        process.on('SIGINT', () => {
+            gracefulShutdown(server, 'SIGINT')
         })
     } catch (error) {
         logger.fatal({error : String(error)}, "Server Not Run")
