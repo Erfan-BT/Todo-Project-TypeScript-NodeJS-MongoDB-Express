@@ -4,6 +4,7 @@ import { env } from './configs/env.config.js'
 import { logger } from './configs/pino.config.js'
 import { connectDB } from './configs/mongoose.config.js'
 import { gracefulShutdown } from './shutdown.js'
+import { initializeRateLimiters } from './middleware/rateLimiter.middleware.js'
 
 const port = env.SERVER_PORT
 
@@ -11,6 +12,9 @@ async function startServer() {
     try {
         // Connect DB
         await connectDB()
+
+        // Init Rate Limiters
+        initializeRateLimiters()
         
         // Start Server
         const server = app.listen(port, () => {
