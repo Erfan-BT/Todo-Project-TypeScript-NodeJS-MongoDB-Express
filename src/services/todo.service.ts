@@ -45,7 +45,7 @@ class TodoService {
 
         // Restore Deleted Todo
         if (!await todoRepository.restoreTodo(todoId, userId))
-            throw new ConflictError('Todo Can Not Restored')
+            throw new ConflictError('Todo Cannot Be Restored')
 
         todo.deletedAt = null
         return todo
@@ -59,7 +59,7 @@ class TodoService {
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         if (todo.deletedAt !== null)
-            throw new BadRequestError('Can Not Change Deleted Todo')
+            throw new BadRequestError('Cannot Change Deleted Todo')
 
         // Create Data
         const data : Partial<Pick<ITodo, 'title' | 'description' | 'priority' | 'dueDate'>> = {}
@@ -81,7 +81,7 @@ class TodoService {
 
         // Change Todo
         if (!await todoRepository.changeTodo(todoId, userId, data))
-            throw new ConflictError('Todo Data Not Changed')
+            throw new ConflictError('Todo Data Was Not Changed')
 
         return data
     }
@@ -94,12 +94,12 @@ class TodoService {
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         if (todo.deletedAt !== null)
-            throw new BadRequestError('Can Not Change Deleted Todo')
+            throw new BadRequestError('Cannot Change Deleted Todo')
 
         // Change Todo Status
         if (todo.status !== status)
             if (!await todoRepository.changeTodoStatus(todoId, userId, todo.status, status))
-                throw new ConflictError('Todo Status Not Changed')
+                throw new ConflictError('Todo Status Was Not Changed')
 
         return status
     }
@@ -113,7 +113,7 @@ class TodoService {
 
         // Delete Todo (Soft)
         if (!await todoRepository.deleteTodo(todoId, userId))
-            throw new ConflictError('Todo Not Deleted')
+            throw new ConflictError('Todo Could Not Be Deleted')
 
         return
     }
@@ -122,7 +122,7 @@ class TodoService {
     : Promise<void> {
         // Delete Todos (Soft)
         if (!await todoRepository.clearUserTodos(userId))
-            throw new ConflictError('User Todos Not Deleted')
+            throw new ConflictError('User Todos Could Not Be Deleted')
 
         return
     }

@@ -72,7 +72,7 @@ class UserAdminService {
             await session.withTransaction(async () => {
                 // Change User
                 if (!await authRepository.changeUser(userId, data, session))
-                    throw new ConflictError('User Not Changed')
+                    throw new ConflictError('User Could Not Be Changed')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -107,7 +107,7 @@ class UserAdminService {
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
         if (user.deletedAt !== null)
-            throw new ForbiddenError('Can Not Change Deleted User Password')
+            throw new ForbiddenError('Cannot Change Deleted User Password')
 
         // Hash Password
         const hashedNewPassword = await argon2.hash(newPassword)
@@ -118,7 +118,7 @@ class UserAdminService {
             await session.withTransaction(async () => {
                 // Change User Password
                 if (!await authRepository.changeAdminPassword(userId, hashedNewPassword, session))
-                    throw new ConflictError('User Password Not Changed')
+                    throw new ConflictError('User Password Could Not Be Changed')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -145,7 +145,7 @@ class UserAdminService {
     : Promise<boolean> {
         // Check Ids
         if (userId === adminId)
-            throw new ForbiddenError('Can Not Change Your Status')
+            throw new ForbiddenError('Cannot Change Your Status')
 
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -153,7 +153,7 @@ class UserAdminService {
             throw new NotFoundError(`User Not Found { ID : ${userId} }`)
 
         if (user.deletedAt !== null)
-            throw new ForbiddenError('Can Not Change Deleted User Status')
+            throw new ForbiddenError('Cannot Change Deleted User Status')
 
         const session = await mongoose.startSession()
         
@@ -161,7 +161,7 @@ class UserAdminService {
             await session.withTransaction(async () => {
                 // Change User Status
                 if (!await authRepository.changeUserStatus(userId, user.active, session))
-                    throw new ConflictError('User Status Not Changed')
+                    throw new ConflictError('User Status Could Not Be Changed')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -188,7 +188,7 @@ class UserAdminService {
     : Promise<void> {
         // Check Ids
         if (userId === adminId)
-            throw new ForbiddenError('Can Not Delete Yourself')
+            throw new ForbiddenError('Cannot Delete Yourself')
 
         // Get User
         const user = await authRepository.getAdminUserById(userId)
@@ -204,7 +204,7 @@ class UserAdminService {
             await session.withTransaction(async () => {
                 // Delete User
                 if (!await authRepository.deleteUser(userId, session))
-                    throw new ConflictError('User Not Deleted')
+                    throw new ConflictError('User Could Not Be Deleted')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -243,7 +243,7 @@ class UserAdminService {
             await session.withTransaction(async () => {
                 // Restore User
                 if (!await authRepository.restoreUser(userId, session))
-                    throw new ConflictError('User Not Restored')
+                    throw new ConflictError('User Could Not Be Restored')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({

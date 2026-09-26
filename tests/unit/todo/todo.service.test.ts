@@ -520,7 +520,7 @@ describe('TodoService', () => {
         })
 
 
-        it('should throw ConflictError when todo can not be changed', async () => {
+        it('should throw ConflictError when todo cannot be changed', async () => {
 
             const userId = new Types.ObjectId()
             const todoId = new Types.ObjectId()
@@ -669,7 +669,7 @@ describe('TodoService', () => {
         })
 
 
-        it('should throw ConflictError when status can not be changed', async () => {
+        it('should throw ConflictError when status cannot be changed', async () => {
 
             const userId = new Types.ObjectId()
             const todoId = new Types.ObjectId()
@@ -759,7 +759,7 @@ describe('TodoService', () => {
         })
 
 
-        it('should throw ConflictError when todo can not be deleted', async () => {
+        it('should throw ConflictError when todo cannot be deleted', async () => {
 
             const userId = new Types.ObjectId()
             const todoId = new Types.ObjectId()
@@ -805,7 +805,7 @@ describe('TodoService', () => {
         })
 
 
-        it('should throw ConflictError when user todos can not be deleted', async () => {
+        it('should throw ConflictError when user todos cannot be deleted', async () => {
 
             const userId = new Types.ObjectId()
 

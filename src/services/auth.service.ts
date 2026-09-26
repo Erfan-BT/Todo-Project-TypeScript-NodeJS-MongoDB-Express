@@ -131,7 +131,7 @@ class AuthService {
     : Promise<void> {
         // Check Passwords
         if (changePasswordData.oldPassword === changePasswordData.newPassword)
-            throw new BadRequestError('The Old Password And The New Password Can Not Be The Same')
+            throw new BadRequestError('The Old Password And The New Password Cannot Be The Same')
 
         // Check Old Password
         const user = await authRepository.getUserById(userId)
@@ -142,7 +142,7 @@ class AuthService {
 
         const checkPassword = await argon2.verify(hashedOldPassword, changePasswordData.oldPassword)
         if (!checkPassword)
-            throw new BadRequestError('The Old Password Is InCorrect')
+            throw new BadRequestError('The Old Password Is Incorrect')
 
         // Hash New Password
         const hashedNewPassword = await argon2.hash(changePasswordData.newPassword)

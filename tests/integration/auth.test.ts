@@ -882,7 +882,7 @@ describe('PATCH /api/v1/auth/change-password', () => {
 
         expect(response.body).toMatchObject({
             success: false,
-            msg: 'The Old Password Is InCorrect',
+            msg: 'The Old Password Is Incorrect',
             data: null
         })
     })
@@ -917,7 +917,7 @@ describe('PATCH /api/v1/auth/change-password', () => {
 
         expect(response.body).toMatchObject({
             success: false,
-            msg: 'The Old Password And The New Password Can Not Be The Same',
+            msg: 'The Old Password And The New Password Cannot Be The Same',
             data: null
         })
     })

@@ -302,7 +302,7 @@ describe('UserAdminController', () => {
 
         it('should pass service error to next', async () => {
 
-            const error = new Error('User Not Changed')
+            const error = new Error('User Could Not Be Changed')
 
             const userId = '507f1f77bcf86cd799439011'
 
@@ -396,7 +396,7 @@ describe('UserAdminController', () => {
 
         it('should pass service error to next', async () => {
 
-            const error = new Error('Can Not Change Password')
+            const error = new Error('Cannot Change Password')
 
             const userId = '507f1f77bcf86cd799439011'
 
@@ -488,7 +488,7 @@ describe('UserAdminController', () => {
 
         it('should pass service error to next', async () => {
 
-            const error = new Error('User Status Not Changed')
+            const error = new Error('User Status Could Not Be Changed')
 
             const userId = '507f1f77bcf86cd799439011'
 
@@ -577,7 +577,7 @@ describe('UserAdminController', () => {
 
         it('should pass service error to next', async () => {
 
-            const error = new Error('User Not Deleted')
+            const error = new Error('User Could Not Be Deleted')
 
             const userId = '507f1f77bcf86cd799439011'
 
@@ -674,7 +674,7 @@ describe('UserAdminController', () => {
 
         it('should pass service error to next', async () => {
 
-            const error = new Error('User Not Restored')
+            const error = new Error('User Could Not Be Restored')
 
             const userId = '507f1f77bcf86cd799439011'
 

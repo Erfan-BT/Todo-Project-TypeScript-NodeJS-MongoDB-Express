@@ -81,7 +81,7 @@ class TodoAdminService {
             await session.withTransaction(async () => {
                 // Change Todo
                 if (!await todoRepository.changeAdminTodo(todoId, data, session))
-                    throw new ConflictError('Todo Not Changed')
+                    throw new ConflictError('Todo Could Not Be Changed')
     
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -114,7 +114,7 @@ class TodoAdminService {
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         if (todo.deletedAt !== null)
-            throw new BadRequestError('Can Not Change Deleted Todo')
+            throw new BadRequestError('Cannot Change Deleted Todo')
 
         if (todo.status === status)
             return status
@@ -125,7 +125,7 @@ class TodoAdminService {
             await session.withTransaction(async () => {
                 // Change Todo Status
                 if (!await todoRepository.changeAdminTodoStatus(todoId, todo.status, status, session))
-                    throw new ConflictError('Todo Status Not Changed')
+                    throw new ConflictError('Todo Status Was Not Changed')
     
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -165,7 +165,7 @@ class TodoAdminService {
             await session.withTransaction(async () => {
                 // Delete Todo
                 if (!await todoRepository.deleteAdminSoftTodo(todoId, session))
-                    throw new ConflictError('Todo Not Deleted')
+                    throw new ConflictError('Todo Could Not Be Deleted')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -200,7 +200,7 @@ class TodoAdminService {
             await session.withTransaction(async () => {
                 // Restore Todo
                 if (!await todoRepository.restoreAdminTodo(todoId, session))
-                    throw new ConflictError('Todo Not Restored')
+                    throw new ConflictError('Todo Could Not Be Restored')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
@@ -228,7 +228,7 @@ class TodoAdminService {
             throw new NotFoundError(`Todo Not Found { ID : ${todoId} }`)
 
         if (todo.deletedAt === null)
-            throw new ForbiddenError('Soft Deleted Required First')
+            throw new ForbiddenError('Todo Must Be Soft Deleted First')
 
         const session = await mongoose.startSession()
 
@@ -236,7 +236,7 @@ class TodoAdminService {
             await session.withTransaction(async () => {
                 // Delete Todo (Hard)
                 if (!await todoRepository.deleteAdminHardTodo(todoId, session))
-                    throw new ConflictError('Todo Not Deleted')
+                    throw new ConflictError('Todo Could Not Be Deleted')
 
                 // Add Admin Audit
                 await auditRepository.createAudit({
