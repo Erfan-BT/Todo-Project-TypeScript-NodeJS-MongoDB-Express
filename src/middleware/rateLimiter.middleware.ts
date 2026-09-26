@@ -15,6 +15,9 @@ const createRateLimiter = (
     keyBy : 'Ip' | 'UserId' | 'Username' = 'Ip'
 ) : RateLimitRequestHandler => {
     const options: Partial<Options> = {
+        skip: () => {
+            return process.env.NODE_ENV === 'test'
+        },
         windowMs,
         limit,
         standardHeaders: 'draft-8',

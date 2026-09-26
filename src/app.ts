@@ -10,6 +10,7 @@ import AdminRoutes from './routes/admin/admin.routes.js'
 import { errorHandler } from './middleware/errorHandler.middleware.js'
 import { NotFoundError } from './utils/appError.js'
 import { loggerMiddleware } from './middleware/logger.middleware.js'
+import { getGeneralIpLimiter } from './middleware/rateLimiter.middleware.js'
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.use(express.urlencoded({
 }))
 
 app.use(loggerMiddleware)
+app.use(getGeneralIpLimiter())
 
 // ---------- Routes ----------
 // Health

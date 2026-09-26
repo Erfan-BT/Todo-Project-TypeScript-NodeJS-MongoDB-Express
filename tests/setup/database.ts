@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import { beforeAll, afterEach, afterAll } from 'vitest'
 
 const TEST_DB_URL = process.env.TEST_DB_URL
+process.env.NODE_ENV = 'test'
 
 if (!TEST_DB_URL) {
     throw new Error('TEST_DB_URL is not defined')
