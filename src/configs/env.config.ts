@@ -19,6 +19,11 @@ const envSchema = z.object({
     JWT_EXPIRES_IN : z.string().min(1),
     JWT_REFRESH_EXPIRES_IN : z.string().min(1),
 
+    // Admin
+    ADMIN_FULLNAME : z.string().min(4),
+    ADMIN_USERNAME : z.string().min(6),
+    ADMIN_PASSWORD : z.string().min(8)
+
 });
 
 const parsed = envSchema.safeParse(process.env);

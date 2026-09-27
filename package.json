@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc -w",
     "start": "nodemon dist/server.js",
+    "dev": "tsc & nodemon dist/server.js",
     "test:run": "vitest run",
     "test": "vitest",
     "test:integration": "vitest run --config vitest.integration.config.ts"
