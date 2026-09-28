@@ -1,6 +1,7 @@
 import z from "zod";
 import { AuditAction, AuditEntityType, AuditSort } from "../types/audit.enum.js";
 import { SortType } from "../types/sort.type.js";
+import { Types } from "mongoose";
 
 export const reasonSchema = z.object({
     reason : z.string().trim().min(3).max(200)
@@ -35,5 +36,10 @@ export const auditQS = z.object({
     }
 })
 
+export const auditIdSchema = z.object({
+    auditId : z.string().trim().refine(Types.ObjectId.isValid, 'Invalid ObjectId').transform(v => new Types.ObjectId(v))
+})
+
 export type ReasonDto = z.infer<typeof reasonSchema>
 export type AuditQSDto = z.infer<typeof auditQS>
+export type AuditIdDto = z.infer<typeof auditIdSchema>

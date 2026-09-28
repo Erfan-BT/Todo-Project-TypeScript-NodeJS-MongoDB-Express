@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware.js";
-import { AuditQSDto } from "../../validations/audit.validation.js";
+import { AuditIdDto, AuditQSDto } from "../../validations/audit.validation.js";
 import auditAdminService from "../../services/admin/audit.admin.service.js";
 
 class AuditAdminController {
@@ -19,6 +19,20 @@ class AuditAdminController {
         }
     }
 
+    async getAudit (req : AuthRequest, res : Response, next : NextFunction) {
+        try {
+            const { auditId } = req.validated.params as AuditIdDto
+            const data = await auditAdminService.getAudit(auditId)
+
+            res.status(200).json({
+                success : true,
+                msg : 'Audit Successfully Found',
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 export default new AuditAdminController()

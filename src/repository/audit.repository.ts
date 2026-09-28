@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import { CreateAudit } from "../types/audit.type.js";
 import { Audit } from "../models/index.js";
 import { IAudit } from "../models/admin.audit.model.js";
@@ -18,6 +18,13 @@ class AuditRepository {
             .skip(skip)
             .limit(limit)
             .lean()
+    }
+
+    async getAudit (auditId : Types.ObjectId)
+    : Promise<IAudit | null> {
+        return Audit.findOne({
+            _id : auditId
+        })
     }
 }
 
