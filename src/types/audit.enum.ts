@@ -16,3 +16,9 @@ export enum AuditEntityType {
     TODO = 'TODO',
     SESSION = 'SESSION'
 }
+
+export enum AuditSort {
+    CREATEDAT = 'CREATEDAT',
+    ACTION = 'ACTION',
+    ENTITYTYPE = 'ENTITYTYPE'
+}

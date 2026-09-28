@@ -9,6 +9,16 @@ class AuditRepository {
         const [audit] = await Audit.create([data], {session})
         return audit
     }
+
+    async getAllAudits (limit : number, skip : number, where : any, sort : any)
+    : Promise<IAudit[]> {
+        return await Audit
+            .find(where)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .lean()
+    }
 }
 
 export default new AuditRepository()
